@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AstroBot — Mission Control Chat" />
+  <title>AstroBot — Mission Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&family=Exo+2:wght@300;400;600&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+  </style>
+</head>
+<body>
+
+  <!-- Star field background -->
+  <div class="stars-canvas" aria-hidden="true"></div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Logout modal -->
+  <div class="modal-overlay" id="logoutModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card glass-card">
+      <div class="modal-title" id="modalTitle">End Mission?</div>
+      <div class="modal-desc">Are you sure you want to log out of AstroBot?</div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-sm" id="cancelLogout">Cancel</button>
+        <button class="btn btn-danger btn-sm" id="confirmLogout">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div class="modal-overlay" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal-card glass-card settings-card">
+      <div class="settings-header">
+        <div class="settings-title" id="settingsTitle">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color:var(--accent-cyan)">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          Settings
+        </div>
+        <button class="settings-close" id="closeSettings" aria-label="Close settings">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="settings-tabs">
+        <button class="settings-tab active" data-tab="profile">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Profile
+        </button>
+        <button class="settings-tab" data-tab="security">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Security
+        </button>
+      </div>
+
+      <!-- Profile panel -->
+      <div class="settings-panel active" id="panel-profile">
+        <div id="profileAlert" class="alert" role="alert"></div>
+        <div class="settings-form">
+          <div class="input-group">
+            <label for="settingsName">First Name</label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              <input type="text" id="settingsName" class="input-field" placeholder="First name" autocomplete="given-name" />
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="settingsSurname">Last Name</label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              <input type="text" id="settingsSurname" class="input-field" placeholder="Last name" autocomplete="family-name" />
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="settingsEmail">Email</label>
+            <div class="input-wrap">
+              <span class="input-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </span>
+              <input type="email" id="settingsEmail" class="input-field" disabled style="opacity:0.5;cursor:not-allowed;" />
+            </div>
+          </div>
+          <button class="btn btn-primary" id="saveProfileBtn" style="width:100%;margin-top:4px;">
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      <!-- Security panel -->
+      <div class="settings-panel" id="panel-security">
+        <div id="securityAlert" class="alert" role="alert"></div>
+        <div class="settings-form">
+          <div class="input-group">
+            <label for="currentPassword">Current Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">🔒</span>
+              <input type="password" id="currentPassword" class="input-field has-toggle" placeholder="Enter current password" autocomplete="current-password" />
+              <button type="button" class="input-toggle" data-target="currentPassword">👁️</button>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="newPassword">New Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">🔑</span>
+              <input type="password" id="newPassword" class="input-field has-toggle" placeholder="Min. 8 characters" autocomplete="new-password" />
+              <button type="button" class="input-toggle" data-target="newPassword">👁️</button>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="confirmNewPassword">Confirm New Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">🔑</span>
+              <input type="password" id="confirmNewPassword" class="input-field has-toggle" placeholder="Repeat new password" autocomplete="new-password" />
+              <button type="button" class="input-toggle" data-target="confirmNewPassword">👁️</button>
+            </div>
+            <div class="match-indicator" id="pwMatchIndicator"></div>
+          </div>
+          <button class="btn btn-primary" id="savePasswordBtn" style="width:100%;margin-top:4px;">
+            Change Password
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat app layout -->
+  <div class="chat-app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar" aria-label="Navigation sidebar">
+
+      <!-- Header -->
+      <div class="sidebar-header">
+        <!-- Tiny robot icon 30px -->
+        <svg width="30" height="34" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="filter:drop-shadow(0 0 8px rgba(0,212,255,0.6))">
+          <defs>
+            <radialGradient id="sb-body" cx="40%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#fff"/>
+              <stop offset="100%" stop-color="#b8d9f0"/>
+            </radialGradient>
+            <radialGradient id="sb-eye" cx="35%" cy="30%" r="65%">
+              <stop offset="0%" stop-color="#80deea"/>
+              <stop offset="100%" stop-color="#006064"/>
+            </radialGradient>
+          </defs>
+          <line x1="100" y1="10" x2="100" y2="40" stroke="#4dd0e1" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="100" cy="8" r="6" fill="#00d4ff"/>
+          <rect x="55" y="38" width="90" height="70" rx="20" fill="url(#sb-body)"/>
+          <rect x="66" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
+          <rect x="106" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
+          <rect x="68" y="57" width="24" height="14" rx="4" fill="url(#sb-eye)" stroke="rgba(0,212,255,0.9)" stroke-width="1.5"/>
+          <rect x="108" y="57" width="24" height="14" rx="4" fill="url(#sb-eye)" stroke="rgba(0,212,255,0.9)" stroke-width="1.5"/>
+          <rect x="88" y="108" width="24" height="12" rx="4" fill="#dce8f0"/>
+          <rect x="50" y="118" width="100" height="80" rx="22" fill="url(#sb-body)"/>
+          <circle cx="100" cy="155" r="7" fill="url(#sb-eye)"/>
+          <path d="M 58 125 Q 30 160 38 210 L 50 205 Q 52 175 62 155 Z" fill="#1a73e8" opacity="0.85"/>
+          <path d="M 142 125 Q 170 160 162 210 L 150 205 Q 148 175 138 155 Z" fill="#1a73e8" opacity="0.85"/>
+        </svg>
+        <span class="sidebar-logo-name">ASTROBOT</span>
+      </div>
+
+      <!-- User section -->
+      <div class="sidebar-user">
+        <div class="user-avatar" id="userInitials" aria-hidden="true">?</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Commander</div>
+          <div class="user-role">Commander</div>
+        </div>
+        <button class="settings-btn" id="settingsBtn" aria-label="Open settings" title="Settings">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Navigation -->
+      <div class="sidebar-nav">
+        <button class="new-chat-btn" id="newChatBtn" aria-label="Start a new chat">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          New Chat
+        </button>
+
+        <div class="nav-section-label">History</div>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">
+            <div style="font-size:1.4rem;margin-bottom:8px;opacity:0.4;">🌌</div>
+            No missions yet.<br/>Start chatting!
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="sidebar-footer">
+        <button class="logout-btn" id="logoutBtn" aria-label="Logout from AstroBot">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main chat area -->
+    <main class="chat-main" role="main">
+
+      <!-- Chat header -->
+      <header class="chat-header">
+        <div class="chat-header-bot">
+          <!-- Mini robot avatar 20px in circular container -->
+          <div class="chat-bot-avatar">
+            <svg viewBox="0 0 200 240" width="26" height="26" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <radialGradient id="hdr-body" cx="40%" cy="30%" r="70%">
+                  <stop offset="0%" stop-color="#fff"/>
+                  <stop offset="100%" stop-color="#b8d9f0"/>
+                </radialGradient>
+                <radialGradient id="hdr-eye" cx="35%" cy="30%" r="65%">
+                  <stop offset="0%" stop-color="#80deea"/>
+                  <stop offset="100%" stop-color="#006064"/>
+                </radialGradient>
+              </defs>
+              <rect x="55" y="38" width="90" height="70" rx="20" fill="url(#hdr-body)"/>
+              <rect x="62" y="82" width="76" height="26" rx="8" fill="rgba(0,10,35,0.9)"/>
+              <rect x="66" y="55" width="28" height="18" rx="5" fill="url(#hdr-eye)" stroke="rgba(0,212,255,0.9)" stroke-width="1.5"/>
+              <rect x="106" y="55" width="28" height="18" rx="5" fill="url(#hdr-eye)" stroke="rgba(0,212,255,0.9)" stroke-width="1.5"/>
+              <line x1="100" y1="10" x2="100" y2="38" stroke="#4dd0e1" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="100" cy="8" r="5" fill="#00d4ff"/>
+            </svg>
+          </div>
+          <div>
+            <div class="chat-bot-name">AstroBot</div>
+            <div class="chat-bot-status">
+              <div class="status-dot" aria-hidden="true"></div>
+              Online
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-header-user">
+          <span class="header-user-name" id="headerUserName">Commander</span>
+          <div class="header-user-avatar" id="headerUserInitials" aria-hidden="true">?</div>
+        </div>
+      </header>
+
+      <!-- Messages area -->
+      <section class="chat-messages" id="messagesContainer" aria-label="Chat messages" aria-live="polite">
+
+        <!-- Welcome screen (shown initially) -->
+        <div class="welcome-screen" id="welcomeScreen">
+          <!-- 80px robot -->
+          <svg class="welcome-robot" viewBox="0 0 200 240" width="90" height="108" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <radialGradient id="wb-body" cx="40%" cy="30%" r="70%">
+                <stop offset="0%" stop-color="#ffffff"/>
+                <stop offset="60%" stop-color="#e8f4fd"/>
+                <stop offset="100%" stop-color="#b8d9f0"/>
+              </radialGradient>
+              <radialGradient id="wb-eye" cx="35%" cy="30%" r="65%">
+                <stop offset="0%" stop-color="#80deea"/>
+                <stop offset="40%" stop-color="#00d4ff"/>
+                <stop offset="100%" stop-color="#006064"/>
+              </radialGradient>
+              <linearGradient id="wb-cape" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1a73e8"/>
+                <stop offset="100%" stop-color="#0d47a1"/>
+              </linearGradient>
+              <filter id="wb-glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <line x1="100" y1="10" x2="100" y2="40" stroke="#4dd0e1" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="100" cy="8" r="6" fill="#00d4ff" filter="url(#wb-glow)">
+              <animate attributeName="r" values="5;7;5" dur="1.8s" repeatCount="indefinite"/>
+            </circle>
+            <rect x="55" y="38" width="90" height="70" rx="20" fill="url(#wb-body)"/>
+            <rect x="42" y="58" width="14" height="24" rx="7" fill="url(#wb-body)" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+            <circle cx="49" cy="70" r="4" fill="rgba(0,212,255,0.5)">
+              <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite"/>
+            </circle>
+            <rect x="144" y="58" width="14" height="24" rx="7" fill="url(#wb-body)" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+            <circle cx="151" cy="70" r="4" fill="rgba(0,212,255,0.5)">
+              <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+            </circle>
+            <rect x="66" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
+            <rect x="106" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
+            <rect x="68" y="57" width="24" height="14" rx="4" fill="url(#wb-eye)" filter="url(#wb-glow)" stroke="rgba(0,212,255,0.9)" stroke-width="1.5"/>
+            <rect x="108" y="57" width="24" height="14" rx="4" fill="url(#wb-eye)" filter="url(#wb-glow)" stroke="rgba(0,212,255,0.9)" stroke-width="1.5"/>
+            <rect x="70" y="59" width="7" height="5" rx="2" fill="white" opacity="0.6"/>
+            <rect x="110" y="59" width="7" height="5" rx="2" fill="white" opacity="0.6"/>
+            <rect x="88" y="108" width="24" height="12" rx="4" fill="#dce8f0"/>
+            <rect x="50" y="118" width="100" height="80" rx="22" fill="url(#wb-body)"/>
+            <rect x="70" y="132" width="60" height="40" rx="10" fill="rgba(0,180,216,0.12)" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+            <circle cx="100" cy="150" r="8" fill="none" stroke="#00d4ff" stroke-width="1.5"/>
+            <circle cx="100" cy="150" r="4" fill="url(#wb-eye)" filter="url(#wb-glow)">
+              <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <path d="M 58 125 Q 30 160 38 205 L 50 200 Q 52 175 62 155 Z" fill="url(#wb-cape)" opacity="0.85"/>
+            <path d="M 142 125 Q 170 160 162 205 L 150 200 Q 148 175 138 155 Z" fill="url(#wb-cape)" opacity="0.85"/>
+            <rect x="28" y="122" width="22" height="50" rx="11" fill="url(#wb-body)"/>
+            <circle cx="39" cy="177" r="9" fill="#e0f0ff"/>
+            <circle cx="39" cy="177" r="4" fill="#1a73e8"/>
+            <rect x="150" y="122" width="22" height="50" rx="11" fill="url(#wb-body)"/>
+            <circle cx="161" cy="177" r="9" fill="#e0f0ff"/>
+            <circle cx="161" cy="177" r="4" fill="#1a73e8"/>
+            <rect x="68" y="196" width="26" height="36" rx="13" fill="url(#wb-body)"/>
+            <circle cx="81" cy="232" r="9" fill="#e0f0ff"/>
+            <circle cx="81" cy="232" r="4" fill="#00d4ff"/>
+            <rect x="106" y="196" width="26" height="36" rx="13" fill="url(#wb-body)"/>
+            <circle cx="119" cy="232" r="9" fill="#e0f0ff"/>
+            <circle cx="119" cy="232" r="4" fill="#00d4ff"/>
+          </svg>
+
+          <h2 class="welcome-title">Welcome back, <span id="welcomeName">Commander</span></h2>
+          <p class="welcome-sub">
+            I'm AstroBot, your intelligent space assistant. Ask me anything —
+            from mission planning to the mysteries of the universe.
+          </p>
+
+          <div class="quick-prompts">
+            <button class="quick-prompt">What can you help me with?</button>
+            <button class="quick-prompt">Tell me something amazing about space</button>
+            <button class="quick-prompt">How does AI work?</button>
+            <button class="quick-prompt">Give me a fun space fact</button>
+          </div>
+        </div>
+
+        <!-- Messages are appended here by JS -->
+        <div id="messagesArea" style="display:none;flex-direction:column;gap:20px;"></div>
+
+      </section>
+
+      <!-- Chat input area -->
+      <div class="chat-input-area">
+        <!-- Recording indicator -->
+        <div class="recording-indicator" id="recordingIndicator" aria-live="polite">
+          <div class="rec-dot" aria-hidden="true"></div>
+          Recording… <span id="recTime">0:00</span> &nbsp;(click mic to stop)
+        </div>
+
+        <div class="chat-input-wrap" id="inputWrap">
+          <textarea
+            class="chat-textarea"
+            id="chatInput"
+            rows="1"
+            placeholder="Ask AstroBot anything…"
+            maxlength="4000"
+            aria-label="Message input"
+            autocomplete="off"
+            spellcheck="true"
+          ></textarea>
+          <div class="input-actions">
+            <button class="mic-btn" id="micBtn" aria-label="Record audio message" title="Record audio message">
+              🎤
+            </button>
+            <button class="send-btn" id="sendBtn" aria-label="Send message" disabled>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <p class="input-hint">
+          Press <kbd>Enter</kbd> to send &nbsp;·&nbsp; <kbd>Shift+Enter</kbd> for new line &nbsp;·&nbsp; 🎤 Click mic to record
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ── Auth check ──────────────────────────────────────────────────
+    const token = localStorage.getItem('astrobot_token');
+    const userStr = localStorage.getItem('astrobot_user');
+    if (!token || !userStr) { window.location.href = '/login.html'; }
+    const user = JSON.parse(userStr);
+
+    // ── Set user info ───────────────────────────────────────────────
+    const initials = (user.name[0] + user.surname[0]).toUpperCase();
+    document.getElementById('userName').textContent = user.name + ' ' + user.surname;
+    document.getElementById('userInitials').textContent = initials;
+    document.getElementById('headerUserName').textContent = user.name;
+    document.getElementById('headerUserInitials').textContent = initials;
+    document.getElementById('welcomeName').textContent = user.name + '!';
+
+    // ── Session ID ──────────────────────────────────────────────────
+    const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+    // ── API helper ──────────────────────────────────────────────────
+    async function apiPost(endpoint, data) {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify(data)
+      });
+      if (res.status === 401) { localStorage.clear(); window.location.href = '/login.html'; }
+      return res.json();
+    }
+
+    // ── Escape HTML ─────────────────────────────────────────────────
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ── Format time ─────────────────────────────────────────────────
+    function fmtTime(d) {
+      return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // ── State ───────────────────────────────────────────────────────
+    const welcomeScreen  = document.getElementById('welcomeScreen');
+    const messagesArea   = document.getElementById('messagesArea');
+    const messagesContainer = document.getElementById('messagesContainer');
+    let hasMessages = false;
+
+    function showChat() {
+      if (!hasMessages) {
+        welcomeScreen.style.display = 'none';
+        messagesArea.style.display = 'flex';
+        hasMessages = true;
+      }
+    }
+
+    // ── Mini bot SVG for avatars ────────────────────────────────────
+    const BOT_AVATAR_SVG = `<svg viewBox="0 0 200 240" width="20" height="20" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <radialGradient id="av-body" cx="40%" cy="30%" r="70%"><stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#b8d9f0"/></radialGradient>
+        <radialGradient id="av-eye" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#80deea"/><stop offset="100%" stop-color="#006064"/></radialGradient>
+      </defs>
+      <rect x="55" y="38" width="90" height="70" rx="20" fill="url(#av-body)"/>
+      <rect x="62" y="82" width="76" height="24" rx="8" fill="rgba(0,10,35,0.9)"/>
+      <rect x="66" y="55" width="28" height="18" rx="5" fill="url(#av-eye)" stroke="rgba(0,212,255,0.9)" stroke-width="1.5"/>
+      <rect x="106" y="55" width="28" height="18" rx="5" fill="url(#av-eye)" stroke="rgba(0,212,255,0.9)" stroke-width="1.5"/>
+      <line x1="100" y1="10" x2="100" y2="38" stroke="#4dd0e1" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="100" cy="8" r="5" fill="#00d4ff"/>
+    </svg>`;
+
+    // ── Add message to UI ───────────────────────────────────────────
+    function addMessage(type, text, audioBlob, imageUrl) {
+      showChat();
+      const div = document.createElement('div');
+      div.className = 'message ' + type + '-msg';
+
+      const avDiv = document.createElement('div');
+      avDiv.className = 'msg-avatar ' + (type === 'user' ? 'user-av' : 'bot-av');
+      avDiv.setAttribute('aria-hidden', 'true');
+      if (type === 'user') {
+        avDiv.textContent = initials;
+      } else {
+        avDiv.innerHTML = BOT_AVATAR_SVG;
+      }
+
+      let audioHTML = '';
+      if (audioBlob && type === 'user') {
+        const url = URL.createObjectURL(audioBlob);
+        audioHTML = '<div class="msg-audio"><div class="msg-audio-label">🎙️ Audio message</div><audio controls src="' + url + '"></audio></div>';
+      }
+
+      let imageHTML = '';
+      if (imageUrl) {
+        imageHTML = '<div class="msg-image-container" style="margin-top:10px;">'
+          + '<img src="' + imageUrl + '" alt="Generated image" style="max-width:100%;border-radius:12px;border:1px solid rgba(0,212,255,0.3);display:block;" '
+          + 'onerror="this.style.display=\'none\'" />'
+          + '<div style="font-size:0.72rem;color:rgba(255,255,255,0.5);margin-top:4px;">🎨 Image générée par AstroBot</div>'
+          + '</div>';
+      }
+
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'msg-content';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+      bubble.innerHTML = escapeHtml(text) + audioHTML + imageHTML;
+
+      const meta = document.createElement('div');
+      meta.className = 'msg-meta';
+
+      const timeEl = document.createElement('span');
+      timeEl.className = 'msg-time';
+      timeEl.textContent = fmtTime(new Date());
+      meta.appendChild(timeEl);
+
+      // Copy button for bot messages
+      if (type === 'bot') {
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.setAttribute('aria-label', 'Copy message');
+        copyBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(text);
+            copyBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+            setTimeout(() => { copyBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy'; }, 2000);
+          } catch(e) { showToast('Could not copy.', 'error'); }
+        });
+        meta.appendChild(copyBtn);
+      }
+
+      contentDiv.appendChild(bubble);
+      contentDiv.appendChild(meta);
+
+      div.appendChild(avDiv);
+      div.appendChild(contentDiv);
+
+      messagesArea.appendChild(div);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      return div;
+    }
+
+    // ── Typing indicator ────────────────────────────────────────────
+    function showTyping() {
+      const div = document.createElement('div');
+      div.className = 'typing-indicator';
+      div.id = 'typingIndicator';
+      const avDiv = document.createElement('div');
+      avDiv.className = 'msg-avatar bot-av';
+      avDiv.setAttribute('aria-hidden', 'true');
+      avDiv.innerHTML = BOT_AVATAR_SVG;
+      div.innerHTML = '';
+      div.appendChild(avDiv);
+      const dots = document.createElement('div');
+      dots.className = 'typing-dots';
+      dots.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+      div.appendChild(dots);
+      messagesArea.appendChild(div);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    function hideTyping() {
+      const t = document.getElementById('typingIndicator');
+      if (t) t.remove();
+    }
+
+    // ── Toast ───────────────────────────────────────────────────────
+    function showToast(msg, type) {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = 'toast toast-' + (type || 'info');
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 4000);
+    }
+
+    // ── Load & render history sidebar ───────────────────────────────
+    let cachedConversations = [];
+
+    async function loadHistory() {
+      try {
+        const res = await fetch('/api/chat/history', { headers: { 'Authorization': 'Bearer ' + token } });
+        const data = await res.json();
+        cachedConversations = data.data || data.conversations || [];
+        renderHistorySidebar();
+      } catch(e) {}
+    }
+
+    function renderHistorySidebar() {
+      const list = document.getElementById('historyList');
+      if (cachedConversations.length === 0) {
+        list.innerHTML = '<div class="history-empty"><div style="font-size:1.4rem;margin-bottom:8px;opacity:0.4;">🌌</div>No missions yet.<br/>Start chatting!</div>';
+        return;
+      }
+      list.innerHTML = '';
+      const today = new Date().toDateString();
+      cachedConversations.slice().reverse().forEach(c => {
+        const d = document.createElement('div');
+        d.className = 'history-item';
+        d.dataset.id = c.id;
+        const t = new Date(c.created_at || c.createdAt);
+        const dateStr = t.toDateString() === today ? 'Today' : t.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
+        const msgText = (c.message || '').substring(0, 28) + ((c.message || '').length > 28 ? '…' : '');
+        d.innerHTML =
+          '<span class="history-item-icon">💬</span>' +
+          '<span class="history-item-text">' + escapeHtml(msgText) + '</span>' +
+          '<span class="history-item-time">' + dateStr + '</span>' +
+          '<button class="history-delete-btn" data-id="' + c.id + '" aria-label="Delete conversation" title="Delete">✕</button>';
+
+        // Click on the item → load all conversations in chat
+        d.addEventListener('click', (e) => {
+          if (e.target.classList.contains('history-delete-btn')) return;
+          openFullHistory();
+        });
+
+        // Delete button
+        d.querySelector('.history-delete-btn').addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = e.target.dataset.id;
+          try {
+            await fetch('/api/chat/' + id, {
+              method: 'DELETE',
+              headers: { 'Authorization': 'Bearer ' + token }
+            });
+            cachedConversations = cachedConversations.filter(x => String(x.id) !== String(id));
+            renderHistorySidebar();
+            showToast('Conversation deleted.', 'info');
+          } catch(err) {
+            showToast('Could not delete.', 'error');
+          }
+        });
+
+        list.appendChild(d);
+      });
+    }
+
+    // Load all conversations into the chat view
+    function openFullHistory() {
+      messagesArea.innerHTML = '';
+      welcomeScreen.style.display = 'none';
+      messagesArea.style.display = 'flex';
+      hasMessages = true;
+      const ordered = cachedConversations.slice(); // already oldest→newest
+      ordered.forEach(c => {
+        // User bubble
+        const uDiv = document.createElement('div');
+        uDiv.className = 'message user-msg';
+        const uAv = document.createElement('div');
+        uAv.className = 'msg-avatar user-av';
+        uAv.setAttribute('aria-hidden', 'true');
+        uAv.textContent = initials;
+        const uContent = document.createElement('div');
+        uContent.className = 'msg-content';
+        const uBubble = document.createElement('div');
+        uBubble.className = 'msg-bubble';
+        uBubble.textContent = c.message || '';
+        const uMeta = document.createElement('div');
+        uMeta.className = 'msg-meta';
+        const uTime = document.createElement('span');
+        uTime.className = 'msg-time';
+        uTime.textContent = fmtTime(new Date(c.created_at || c.createdAt));
+        uMeta.appendChild(uTime);
+        uContent.appendChild(uBubble);
+        uContent.appendChild(uMeta);
+        uDiv.appendChild(uAv);
+        uDiv.appendChild(uContent);
+        messagesArea.appendChild(uDiv);
+
+        // Bot bubble
+        if (c.response) {
+          const bDiv = document.createElement('div');
+          bDiv.className = 'message bot-msg';
+          const bAv = document.createElement('div');
+          bAv.className = 'msg-avatar bot-av';
+          bAv.setAttribute('aria-hidden', 'true');
+          bAv.innerHTML = BOT_AVATAR_SVG;
+          const bContent = document.createElement('div');
+          bContent.className = 'msg-content';
+          const bBubble = document.createElement('div');
+          bBubble.className = 'msg-bubble';
+          bBubble.textContent = c.response;
+          const bMeta = document.createElement('div');
+          bMeta.className = 'msg-meta';
+          const bTime = document.createElement('span');
+          bTime.className = 'msg-time';
+          bTime.textContent = fmtTime(new Date(c.created_at || c.createdAt));
+          bMeta.appendChild(bTime);
+          bContent.appendChild(bBubble);
+          bContent.appendChild(bMeta);
+          bDiv.appendChild(bAv);
+          bDiv.appendChild(bContent);
+          messagesArea.appendChild(bDiv);
+        }
+      });
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // ── Send text message ───────────────────────────────────────────
+    const textarea = document.getElementById('chatInput');
+    const sendBtn  = document.getElementById('sendBtn');
+
+    async function sendMessage(text) {
+      if (!text || !text.trim()) return;
+      textarea.value = '';
+      textarea.style.height = 'auto';
+      sendBtn.disabled = true;
+      addMessage('user', text);
+      showTyping();
+      try {
+        const data = await apiPost('/api/chat/message', { message: text, session_id: sessionId });
+        hideTyping();
+        const response = (data.response || (data.data && data.data.response)) || "I'm currently offline from my main systems. Please check back shortly, Commander.";
+        const imageUrl = data.data && data.data.image_url ? data.data.image_url : null;
+        addMessage('bot', response, null, imageUrl);
+        loadHistory();
+      } catch(e) {
+        hideTyping();
+        addMessage('bot', 'Connection error. Please check your network, Commander.');
+      }
+    }
+
+    // ── Send audio ──────────────────────────────────────────────────
+    async function sendAudio(blob) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result.split(',')[1];
+        addMessage('user', '🎙️ Audio message sent', blob);
+        showTyping();
+        try {
+          const data = await apiPost('/api/chat/message', { audio: base64, session_id: sessionId, message: '[Audio message]' });
+          hideTyping();
+          const response = (data.response || (data.data && data.data.response)) || 'Audio received. Processing your request, Commander.';
+          addMessage('bot', response);
+          loadHistory();
+        } catch(e) {
+          hideTyping();
+          addMessage('bot', 'Audio processing failed. Please try again.');
+        }
+      };
+      reader.readAsDataURL(blob);
+    }
+
+    // ── Input handlers ──────────────────────────────────────────────
+    textarea.addEventListener('input', () => {
+      textarea.style.height = 'auto';
+      textarea.style.height = Math.min(textarea.scrollHeight, 140) + 'px';
+      sendBtn.disabled = textarea.value.trim().length === 0;
+    });
+    textarea.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (!sendBtn.disabled) sendMessage(textarea.value);
+      }
+    });
+    sendBtn.addEventListener('click', () => sendMessage(textarea.value));
+
+    // ── Quick prompts ───────────────────────────────────────────────
+    document.querySelectorAll('.quick-prompt').forEach(btn => {
+      btn.addEventListener('click', () => sendMessage(btn.textContent.trim()));
+    });
+
+    // ── New chat ────────────────────────────────────────────────────
+    document.getElementById('newChatBtn').addEventListener('click', () => {
+      messagesArea.innerHTML = '';
+      welcomeScreen.style.display = 'flex';
+      messagesArea.style.display = 'none';
+      hasMessages = false;
+    });
+
+    // ── Audio recording ─────────────────────────────────────────────
+    let mediaRecorder = null;
+    let audioChunks   = [];
+    let isRecording   = false;
+    const micBtn         = document.getElementById('micBtn');
+    const recIndicator   = document.getElementById('recordingIndicator');
+    const recTimeEl      = document.getElementById('recTime');
+    let recInterval = null;
+    let recSeconds  = 0;
+
+    micBtn.addEventListener('click', async () => {
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          audioChunks = [];
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+          mediaRecorder.onstop = () => {
+            stream.getTracks().forEach(t => t.stop());
+            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            sendAudio(blob);
+          };
+          mediaRecorder.start();
+          isRecording = true;
+          micBtn.classList.add('recording');
+          recIndicator.classList.add('show');
+          recSeconds = 0;
+          recTimeEl.textContent = '0:00';
+          recInterval = setInterval(() => {
+            recSeconds++;
+            const m = Math.floor(recSeconds / 60);
+            const s = recSeconds % 60;
+            recTimeEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+            if (recSeconds >= 60) stopRecording();
+          }, 1000);
+        } catch(e) {
+          showToast('Microphone access denied.', 'error');
+        }
+      } else {
+        stopRecording();
+      }
+    });
+
+    function stopRecording() {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        isRecording = false;
+        micBtn.classList.remove('recording');
+        recIndicator.classList.remove('show');
+        clearInterval(recInterval);
+      }
+    }
+
+    // ── Logout modal ────────────────────────────────────────────────
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      document.getElementById('logoutModal').classList.add('show');
+    });
+    document.getElementById('cancelLogout').addEventListener('click', () => {
+      document.getElementById('logoutModal').classList.remove('show');
+    });
+    document.getElementById('confirmLogout').addEventListener('click', () => {
+      localStorage.clear();
+      window.location.href = '/';
+    });
+    document.getElementById('logoutModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('logoutModal')) {
+        document.getElementById('logoutModal').classList.remove('show');
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') document.getElementById('logoutModal').classList.remove('show');
+    });
+
+    // ── Settings modal ──────────────────────────────────────────────
+    const settingsModal = document.getElementById('settingsModal');
+
+    function openSettings() {
+      document.getElementById('settingsName').value = user.name || '';
+      document.getElementById('settingsSurname').value = user.surname || '';
+      document.getElementById('settingsEmail').value = user.email || '';
+      ['profileAlert','securityAlert'].forEach(id => {
+        const el = document.getElementById(id);
+        el.className = 'alert';
+        el.textContent = '';
+      });
+      ['currentPassword','newPassword','confirmNewPassword'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('pwMatchIndicator').textContent = '';
+      switchSettingsTab('profile');
+      settingsModal.classList.add('show');
+    }
+
+    function switchSettingsTab(tab) {
+      document.querySelectorAll('.settings-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+      document.querySelectorAll('.settings-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+    }
+
+    document.getElementById('settingsBtn').addEventListener('click', openSettings);
+    document.getElementById('closeSettings').addEventListener('click', () => settingsModal.classList.remove('show'));
+    settingsModal.addEventListener('click', (e) => { if (e.target === settingsModal) settingsModal.classList.remove('show'); });
+    document.querySelectorAll('.settings-tab').forEach(tab => tab.addEventListener('click', () => switchSettingsTab(tab.dataset.tab)));
+
+    settingsModal.querySelectorAll('.input-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const inp = document.getElementById(btn.dataset.target);
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+        btn.textContent = inp.type === 'password' ? '👁️' : '🙈';
+      });
+    });
+
+    ['newPassword','confirmNewPassword'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => {
+        const np = document.getElementById('newPassword').value;
+        const cp = document.getElementById('confirmNewPassword').value;
+        const ind = document.getElementById('pwMatchIndicator');
+        if (!cp) { ind.textContent = ''; return; }
+        if (np === cp) { ind.className = 'match-indicator match-ok'; ind.textContent = '✓ Passwords match'; }
+        else { ind.className = 'match-indicator match-bad'; ind.textContent = '✗ Passwords do not match'; }
+      });
+    });
+
+    function showSettingsAlert(panelId, msg, type) {
+      const el = document.getElementById(panelId);
+      el.className = 'alert show alert-' + type;
+      el.textContent = msg;
+    }
+
+    document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('saveProfileBtn');
+      const name = document.getElementById('settingsName').value.trim();
+      const surname = document.getElementById('settingsSurname').value.trim();
+      if (!name || !surname) { showSettingsAlert('profileAlert', 'Please fill in all fields.', 'error'); return; }
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+      try {
+        const res = await fetch('/api/auth/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ name, surname })
+        });
+        const data = await res.json();
+        if (data.success) {
+          user.name = data.user.name;
+          user.surname = data.user.surname;
+          localStorage.setItem('astrobot_user', JSON.stringify(data.user));
+          localStorage.setItem('astrobot_token', data.token);
+          const newInitials = (data.user.name[0] + data.user.surname[0]).toUpperCase();
+          document.getElementById('userName').textContent = data.user.name + ' ' + data.user.surname;
+          document.getElementById('userInitials').textContent = newInitials;
+          document.getElementById('headerUserName').textContent = data.user.name;
+          document.getElementById('headerUserInitials').textContent = newInitials;
+          document.getElementById('welcomeName').textContent = data.user.name + '!';
+          showSettingsAlert('profileAlert', 'Profile updated successfully!', 'success');
+          showToast('Profile updated!', 'success');
+        } else {
+          showSettingsAlert('profileAlert', data.error || 'Update failed.', 'error');
+        }
+      } catch(e) {
+        showSettingsAlert('profileAlert', 'Connection error. Please try again.', 'error');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+    });
+
+    document.getElementById('savePasswordBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('savePasswordBtn');
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+      if (!currentPassword || !newPassword || !confirmNewPassword) {
+        showSettingsAlert('securityAlert', 'Please fill in all fields.', 'error'); return;
+      }
+      if (newPassword !== confirmNewPassword) {
+        showSettingsAlert('securityAlert', 'New passwords do not match.', 'error'); return;
+      }
+      if (newPassword.length < 8) {
+        showSettingsAlert('securityAlert', 'New password must be at least 8 characters.', 'error'); return;
+      }
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>';
+      try {
+        const res = await fetch('/api/auth/password', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ currentPassword, newPassword })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showSettingsAlert('securityAlert', 'Password changed successfully!', 'success');
+          showToast('Password changed!', 'success');
+          ['currentPassword','newPassword','confirmNewPassword'].forEach(id => { document.getElementById(id).value = ''; });
+          document.getElementById('pwMatchIndicator').textContent = '';
+        } else {
+          showSettingsAlert('securityAlert', data.error || 'Failed to change password.', 'error');
+        }
+      } catch(e) {
+        showSettingsAlert('securityAlert', 'Connection error. Please try again.', 'error');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Change Password';
+    });
+
+    // ── Shooting stars ──────────────────────────────────────────────
+    (function() {
+      const NUM = 6;
+      const stars = [];
+      for (let i = 0; i < NUM; i++) {
+        const el = document.createElement('div');
+        el.className = 'shooting-star';
+        document.body.appendChild(el);
+        stars.push(el);
+      }
+      function launchStar(el) {
+        const startX = Math.random() * window.innerWidth;
+        const startY = Math.random() * window.innerHeight * 0.6;
+        const angle  = 15 + Math.random() * 25; // degrees, slightly downward
+        const dist   = 200 + Math.random() * 400;
+        const rad    = angle * Math.PI / 180;
+        const tx     = Math.cos(rad) * dist;
+        const ty     = Math.sin(rad) * dist;
+        const dur    = 1.2 + Math.random() * 1.8;
+        el.style.cssText = `
+          position:fixed; top:${startY}px; left:${startX}px;
+          opacity:0; z-index:0; pointer-events:none;
+          --angle:${angle}deg; --tx:${tx}px; --ty:${ty}px;
+          animation: shoot ${dur}s linear forwards;
+        `;
+        el.addEventListener('animationend', () => {
+          el.style.animation = 'none';
+          const delay = 3000 + Math.random() * 8000;
+          setTimeout(() => launchStar(el), delay);
+        }, { once: true });
+      }
+      stars.forEach((el, i) => {
+        setTimeout(() => launchStar(el), i * 2500 + Math.random() * 3000);
+      });
+    })();
+
+    // ── Init ────────────────────────────────────────────────────────
+    loadHistory();
+    textarea.focus();
+  </script>
+</body>
+</html>

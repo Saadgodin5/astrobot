@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AstroBot — Your intelligent space-powered AI assistant" />
+  <title>AstroBot — Your Intelligent Space Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&family=Exo+2:wght@300;400;600&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Star field background -->
+  <div class="stars-canvas" aria-hidden="true"></div>
+
+  <!-- Landing page wrapper -->
+  <div class="landing-page">
+
+    <!-- Navigation -->
+    <nav class="landing-nav" role="navigation" aria-label="Main navigation">
+      <a href="index.html" class="nav-logo" aria-label="AstroBot home">
+        <!-- Small robot icon 30px -->
+        <svg width="30" height="30" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <radialGradient id="nb-body" cx="40%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#fff"/>
+              <stop offset="100%" stop-color="#b8d9f0"/>
+            </radialGradient>
+            <radialGradient id="nb-eye" cx="35%" cy="30%" r="65%">
+              <stop offset="0%" stop-color="#80deea"/>
+              <stop offset="100%" stop-color="#006064"/>
+            </radialGradient>
+          </defs>
+          <line x1="100" y1="10" x2="100" y2="40" stroke="#4dd0e1" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="100" cy="8" r="6" fill="#00d4ff"/>
+          <rect x="55" y="38" width="90" height="70" rx="20" fill="url(#nb-body)"/>
+          <rect x="66" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
+          <rect x="106" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
+          <rect x="68" y="57" width="24" height="14" rx="4" fill="#00d4ff" opacity="0.9"/>
+          <rect x="108" y="57" width="24" height="14" rx="4" fill="#00d4ff" opacity="0.9"/>
+          <rect x="50" y="118" width="100" height="80" rx="22" fill="url(#nb-body)"/>
+          <path d="M 58 125 Q 30 160 38 210 L 50 205 Q 52 175 62 155 Z" fill="#1a73e8" opacity="0.85"/>
+        </svg>
+        <span class="nav-logo-name">ASTROBOT</span>
+      </a>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-outline btn-sm">Login</a>
+        <a href="register.html" class="btn btn-orange btn-sm">Get Started</a>
+      </div>
+    </nav>
+
+    <div class="landing-body">
+      <!-- Hero section -->
+      <section class="landing-hero" aria-label="Hero section">
+
+        <!-- Left: content -->
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="badge-dot" aria-hidden="true"></span>
+            V1.0 Online
+          </div>
+
+          <h1 class="hero-title">
+            Your Intelligent<br>
+            <span>Space Assistant</span>
+          </h1>
+
+          <p class="hero-desc">
+            AstroBot is your AI-powered companion for any question, mission, or challenge.
+            Available around the clock, built for commanders like you.
+          </p>
+
+          <div class="hero-actions">
+            <a href="login.html" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                <polyline points="10 17 15 12 10 7"/>
+                <line x1="15" y1="12" x2="3" y2="12"/>
+              </svg>
+              Login
+            </a>
+            <a href="register.html" class="btn btn-orange">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+                <line x1="19" y1="8" x2="19" y2="14"/>
+                <line x1="16" y1="11" x2="22" y2="11"/>
+              </svg>
+              Get Started
+            </a>
+          </div>
+
+          <div class="hero-stats" aria-label="Statistics">
+            <div class="stat-item">
+              <span class="stat-value">100+</span>
+              <span class="stat-label">Users</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">24/7</span>
+              <span class="stat-label">Online</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">AI</span>
+              <span class="stat-label">Powered</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Robot character -->
+        <div class="hero-visual" aria-hidden="true">
+          <div class="robot-container" id="robotContainer">
+            <div class="robot-glow"></div>
+            <div class="orbit-ring orbit-ring-1"></div>
+            <div class="orbit-ring orbit-ring-2"></div>
+
+            <!-- Large AstroBot SVG 280x320 -->
+            <svg id="robotSvg" viewBox="0 0 200 240" width="280" height="320" xmlns="http://www.w3.org/2000/svg" aria-label="AstroBot robot character" role="img" style="cursor:default;overflow:visible;">
+              <defs>
+                <radialGradient id="hb-body" cx="40%" cy="30%" r="70%">
+                  <stop offset="0%" stop-color="#ffffff"/>
+                  <stop offset="60%" stop-color="#e8f4fd"/>
+                  <stop offset="100%" stop-color="#b8d9f0"/>
+                </radialGradient>
+                <radialGradient id="hb-eye" cx="35%" cy="30%" r="65%">
+                  <stop offset="0%" stop-color="#80deea"/>
+                  <stop offset="40%" stop-color="#00d4ff"/>
+                  <stop offset="100%" stop-color="#006064"/>
+                </radialGradient>
+                <linearGradient id="hb-cape" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#1a73e8"/>
+                  <stop offset="100%" stop-color="#0d47a1"/>
+                </linearGradient>
+                <filter id="hb-glow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <linearGradient id="hb-shine" x1="0%" y1="0%" x2="50%" y2="100%">
+                  <stop offset="0%" stop-color="#fff" stop-opacity="0.5"/>
+                  <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+
+              <!-- ── HEAD GROUP ── -->
+              <g id="robotHead">
+                <!-- Antenna -->
+                <line x1="100" y1="10" x2="100" y2="40" stroke="#4dd0e1" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="100" cy="8" r="6" fill="#00d4ff" filter="url(#hb-glow)">
+                  <animate attributeName="r" values="5;7;5" dur="1.8s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values="0.8;1;0.8" dur="1.8s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="100" cy="8" r="3" fill="white" opacity="0.8"/>
+                <!-- Head -->
+                <rect x="55" y="38" width="90" height="70" rx="20" fill="url(#hb-body)" filter="url(#hb-glow)"/>
+                <ellipse cx="86" cy="50" rx="22" ry="10" fill="url(#hb-shine)" opacity="0.7"/>
+                <!-- Ear sensors -->
+                <rect x="42" y="58" width="14" height="24" rx="7" fill="url(#hb-body)" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+                <circle cx="49" cy="70" r="4" fill="rgba(0,212,255,0.5)">
+                  <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <rect x="144" y="58" width="14" height="24" rx="7" fill="url(#hb-body)" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+                <circle cx="151" cy="70" r="4" fill="rgba(0,212,255,0.5)">
+                  <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" begin="1.5s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Eyes -->
+                <rect x="66" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
+                <rect x="106" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
+                <rect x="68" y="57" width="24" height="14" rx="4" fill="url(#hb-eye)" filter="url(#hb-glow)" stroke="rgba(0,212,255,0.9)" stroke-width="1.5"/>
+                <rect x="108" y="57" width="24" height="14" rx="4" fill="url(#hb-eye)" filter="url(#hb-glow)" stroke="rgba(0,212,255,0.9)" stroke-width="1.5"/>
+                <!-- Eye glints (shift to follow cursor) -->
+                <rect id="eyeGlintL" x="70" y="59" width="8" height="5" rx="2" fill="white" opacity="0.7"/>
+                <rect id="eyeGlintR" x="110" y="59" width="8" height="5" rx="2" fill="white" opacity="0.7"/>
+                <!-- Eye glow halos -->
+                <rect x="65" y="54" width="30" height="20" rx="6" fill="none" stroke="rgba(0,212,255,0.3)" stroke-width="2.5">
+                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite"/>
+                </rect>
+                <rect x="105" y="54" width="30" height="20" rx="6" fill="none" stroke="rgba(0,212,255,0.3)" stroke-width="2.5">
+                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" begin="0.4s" repeatCount="indefinite"/>
+                </rect>
+                <!-- Mouth / speaker grille -->
+                <rect x="82" y="82" width="36" height="8" rx="4" fill="rgba(0,10,30,0.55)"/>
+                <rect x="86" y="84" width="8" height="4" rx="2" fill="#00d4ff" opacity="0.6"/>
+                <rect x="97" y="84" width="8" height="4" rx="2" fill="#00d4ff" opacity="0.6"/>
+                <rect x="108" y="84" width="6" height="4" rx="2" fill="#00d4ff" opacity="0.4"/>
+              </g>
+              <!-- ── END HEAD GROUP ── -->
+
+              <!-- Neck -->
+              <rect x="88" y="108" width="24" height="12" rx="4" fill="#dce8f0"/>
+              <rect x="88" y="111" width="24" height="3" rx="1.5" fill="rgba(0,212,255,0.3)"/>
+              <!-- Body -->
+              <rect x="50" y="118" width="100" height="80" rx="22" fill="url(#hb-body)" filter="url(#hb-glow)"/>
+              <ellipse cx="80" cy="128" rx="18" ry="9" fill="url(#hb-shine)" opacity="0.6"/>
+              <!-- Chest panel -->
+              <rect x="70" y="132" width="60" height="45" rx="10" fill="rgba(0,180,216,0.12)" stroke="rgba(0,212,255,0.35)" stroke-width="1"/>
+              <circle cx="100" cy="148" r="10" fill="none" stroke="#00d4ff" stroke-width="2"/>
+              <circle cx="100" cy="148" r="5" fill="url(#hb-eye)" filter="url(#hb-glow)">
+                <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="100" cy="148" r="2" fill="white"/>
+              <!-- Chest lights -->
+              <rect x="76" y="164" width="8" height="6" rx="3" fill="#1a73e8" opacity="0.7"/>
+              <rect x="88" y="164" width="8" height="6" rx="3" fill="#00d4ff" opacity="0.7"/>
+              <rect x="100" y="164" width="8" height="6" rx="3" fill="#1a73e8" opacity="0.7"/>
+              <rect x="112" y="164" width="8" height="6" rx="3" fill="#f4a623" opacity="0.7"/>
+              <!-- Cape -->
+              <path d="M 58 125 Q 30 160 38 210 L 50 205 Q 52 175 62 155 Z" fill="#1a73e8" opacity="0.85"/>
+              <path d="M 142 125 Q 170 160 162 210 L 150 205 Q 148 175 138 155 Z" fill="#1a73e8" opacity="0.85"/>
+              <!-- Left arm -->
+              <rect x="28" y="122" width="22" height="55" rx="11" fill="url(#hb-body)"/>
+              <circle cx="39" cy="182" r="10" fill="#e0f0ff"/>
+              <circle cx="39" cy="182" r="5" fill="#1a73e8"/>
+              <!-- Right arm -->
+              <rect x="150" y="122" width="22" height="55" rx="11" fill="url(#hb-body)"/>
+              <circle cx="161" cy="182" r="10" fill="#e0f0ff"/>
+              <circle cx="161" cy="182" r="5" fill="#1a73e8"/>
+              <!-- Left leg -->
+              <rect x="68" y="196" width="26" height="38" rx="13" fill="url(#hb-body)"/>
+              <circle cx="81" cy="236" r="10" fill="#e0f0ff"/>
+              <circle cx="81" cy="236" r="5" fill="#00d4ff"/>
+              <!-- Right leg -->
+              <rect x="106" y="196" width="26" height="38" rx="13" fill="url(#hb-body)"/>
+              <circle cx="119" cy="236" r="10" fill="#e0f0ff"/>
+              <circle cx="119" cy="236" r="5" fill="#00d4ff"/>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features strip -->
+      <section class="features-strip" aria-label="Features">
+        <div class="feature-card">
+          <span class="feature-icon">⚡</span>
+          <div class="feature-title">Instant Responses</div>
+          <div class="feature-desc">Sub-second answers powered by advanced AI systems</div>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🔒</span>
+          <div class="feature-title">Secure &amp; Private</div>
+          <div class="feature-desc">End-to-end encryption keeps your missions classified</div>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🌐</span>
+          <div class="feature-title">Space-grade AI</div>
+          <div class="feature-desc">Trained on vast knowledge to tackle any challenge</div>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📋</span>
+          <div class="feature-title">Full History</div>
+          <div class="feature-desc">All your conversations saved and accessible anytime</div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="landing-footer-bar" aria-label="Footer">
+        © 2026 AstroBot &middot; Built by Tidiane Konaté &middot; All systems operational
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // Redirect if already logged in
+    const t = localStorage.getItem('astrobot_token');
+    const u = localStorage.getItem('astrobot_user');
+    if (t && u) {
+      window.location.href = 'chat.html';
+    }
+  </script>
+
+  <script>
+    // ── Robot click: superhero takeoff animation ──
+    (function () {
+      const container = document.getElementById('robotContainer');
+      if (!container) return;
+
+      let isAnimating = false;
+
+      // Helper: create a DOM element with inline styles, appended to a parent
+      function make(tag, css, parent) {
+        const el = document.createElement(tag);
+        el.style.cssText = css;
+        (parent || document.body).appendChild(el);
+        return el;
+      }
+      function later(el, ms) {
+        setTimeout(function () { el && el.parentNode && el.remove(); }, ms);
+      }
+
+      function launch() {
+        if (isAnimating) return;
+        isAnimating = true;
+
+        // ── Stop float, start circle-flight keyframe ──
+        container.style.animation = 'none';
+        container.offsetHeight; // force reflow
+        container.classList.add('robot-animating');
+
+        // ── Shockwave at feet (t=0) ──
+        const sw = make('div',
+          'position:absolute;bottom:-5px;left:50%;' +
+          'border-radius:50%;border:2px solid rgba(0,212,255,0.85);' +
+          'background:rgba(0,212,255,0.12);pointer-events:none;z-index:5;' +
+          'animation:robotShockwave 0.55s ease-out forwards;',
+          container);
+        later(sw, 650);
+
+        // ── Thruster flames below the feet (t=500ms) ──
+        // SVG 280×320; left foot cx=81→x=113px, right cx=119→x=167px; cy=236→y=314px
+        setTimeout(function () {
+          [102, 156].forEach(function (lx, i) {
+            const fl = make('div',
+              'position:absolute;top:313px;left:' + lx + 'px;' +
+              'width:22px;height:58px;pointer-events:none;z-index:5;' +
+              'transform-origin:top center;border-radius:0 0 11px 11px;' +
+              'background:linear-gradient(to bottom,#fff 0%,#ffdd00 25%,#ff6600 60%,transparent 100%);' +
+              'filter:blur(1.5px);opacity:0.94;' +
+              'animation:thrusterBurn 0.12s ease-in-out infinite;' +
+              'animation-delay:' + (i * 0.06) + 's;',
+              container);
+            later(fl, 500); // thrusters visible only during activation phase
+          });
+        }, 500);
+
+        // ── Real-time trail particles along the circular path (t=800ms–3100ms) ──
+        const symbols = ['✦', '✧', '⋆', '·', '✦'];
+        let symIdx = 0;
+        const trailInterval = setInterval(function () {
+          const r = container.getBoundingClientRect();
+          const cx = r.left + r.width  * 0.5;
+          const cy = r.top  + r.height * 0.45;
+          const offX = (Math.random() - 0.5) * 30;
+          const offY = (Math.random() - 0.5) * 30;
+          const sym = symbols[symIdx++ % symbols.length];
+          const col = symIdx % 2 === 0 ? '#00d4ff' : '#ffffff';
+          const sz  = 10 + Math.floor(Math.random() * 7);
+          const star = make('div',
+            'position:fixed;z-index:999;pointer-events:none;' +
+            'top:'  + (cy + offY) + 'px;' +
+            'left:' + (cx + offX) + 'px;' +
+            'font-size:' + sz + 'px;color:' + col + ';' +
+            'animation:trailStarPop 0.65s ease-out forwards;');
+          star.textContent = sym;
+          later(star, 750);
+        }, 260);
+        setTimeout(function () { clearInterval(trailInterval); }, 3100);
+
+        // ── Landing shockwave (t=3200ms, 80% mark = robot back home) ──
+        setTimeout(function () {
+          const lf = make('div',
+            'position:absolute;bottom:-5px;left:50%;' +
+            'border-radius:50%;border:2px solid rgba(0,212,255,0.9);' +
+            'background:radial-gradient(circle,rgba(0,212,255,0.35) 0%,transparent 70%);' +
+            'pointer-events:none;z-index:5;' +
+            'animation:landingFlash 0.55s ease-out forwards;',
+            container);
+          later(lf, 650);
+        }, 3200);
+
+        // ── Reset: resume normal float (t=4000ms) ──
+        setTimeout(function () {
+          container.classList.remove('robot-animating');
+          container.style.animation = '';
+          isAnimating = false;
+        }, 4000);
+      }
+
+      container.addEventListener('click', launch);
+      // Touch support
+      container.addEventListener('touchstart', function (e) {
+        e.preventDefault();
+        launch();
+      }, { passive: false });
+    })();
+  </script>
+</body>
+</html>
