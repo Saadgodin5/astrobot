@@ -8,6 +8,7 @@ AstroBot is an AI-powered chat assistant with a space-themed UI. Users can regis
 
 - [Overview](#overview)
 - [Project Structure](#project-structure)
+- [n8n Workflow](#n8n-workflow)
 - [Frontend](#frontend)
 - [Backend](#backend)
 - [How It Works](#how-it-works)
@@ -33,6 +34,8 @@ AstroBot provides:
 
 ## Project Structure
 
+> 📘 **New:** See [**docs/N8N_WORKFLOW.md**](docs/N8N_WORKFLOW.md) for a step-by-step guide to the n8n AI workflow (Whisper, Mistral, SerpAPI).
+
 ```
 astrobot/
 ├── frontend/           # Static HTML/CSS/JS
@@ -49,9 +52,24 @@ astrobot/
 ├── docker/             # Docker config
 │   ├── Dockerfile
 │   └── docker-compose.yml
+├── docs/              # Documentation
+│   └── N8N_WORKFLOW.md  # n8n workflow step-by-step guide
 ├── requirements.txt    # Python deps (deploy script)
 └── README.md
 ```
+
+---
+
+## n8n Workflow
+
+The AI chat is powered by an **n8n workflow** that:
+
+1. Receives text or voice messages via webhook
+2. Transcribes voice with **Whisper**
+3. Sends the prompt to an **AI Agent** (Mistral) with **SerpAPI** (web search) and **Think** (reasoning)
+4. Returns the response to the frontend
+
+📘 **Full step-by-step guide with examples:** [docs/N8N_WORKFLOW.md](docs/N8N_WORKFLOW.md)
 
 ---
 
