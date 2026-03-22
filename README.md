@@ -329,4 +329,4 @@ MIT
 
 ---
 
-**Built with 🚀 by Tidiane Konaté**
+**Built with 🚀 by Tidiane, Saad, Ahmed & Sidi**
