@@ -3,375 +3,624 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="AstroBot — Your intelligent space-powered AI assistant" />
+  <meta name="description" content="AstroBot — Your intelligent space-powered AI assistant, built for commanders." />
   <title>AstroBot — Your Intelligent Space Assistant</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&family=Exo+2:wght@300;400;600&display=swap" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=3.0" />
 </head>
-<body>
+<body class="landing-v2">
 
   <!-- Star field background -->
   <div class="stars-canvas" aria-hidden="true"></div>
 
-  <!-- Landing page wrapper -->
-  <div class="landing-page">
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer" aria-live="assertive" aria-atomic="true"></div>
 
-    <!-- Navigation -->
-    <nav class="landing-nav" role="navigation" aria-label="Main navigation">
-      <a href="index.html" class="nav-logo" aria-label="AstroBot home">
-        <!-- Small robot icon 30px -->
-        <svg width="30" height="30" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <!-- ═══════════════════════════════════════════════════════════════
+       NAVIGATION
+       ═══════════════════════════════════════════════════════════════ -->
+  <nav class="nav-v2" role="navigation" aria-label="Main navigation">
+    <a href="#home" class="nav-v2-brand" aria-label="AstroBot home">
+      <svg width="34" height="34" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="nav-v2-robot">
+        <defs>
+          <radialGradient id="nv-body" cx="40%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#fff"/>
+            <stop offset="100%" stop-color="#b8d9f0"/>
+          </radialGradient>
+          <radialGradient id="nv-eye" cx="35%" cy="30%" r="65%">
+            <stop offset="0%" stop-color="#80deea"/>
+            <stop offset="100%" stop-color="#006064"/>
+          </radialGradient>
+        </defs>
+        <line x1="100" y1="10" x2="100" y2="40" stroke="#4dd0e1" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="100" cy="8" r="6" fill="#00d4ff"/>
+        <rect x="55" y="38" width="90" height="70" rx="20" fill="url(#nv-body)"/>
+        <rect x="66" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
+        <rect x="106" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
+        <rect x="68" y="57" width="24" height="14" rx="4" fill="url(#nv-eye)"/>
+        <rect x="108" y="57" width="24" height="14" rx="4" fill="url(#nv-eye)"/>
+        <rect x="50" y="118" width="100" height="80" rx="22" fill="url(#nv-body)"/>
+        <path d="M 58 125 Q 30 160 38 210 L 50 205 Q 52 175 62 155 Z" fill="#1a73e8" opacity="0.85"/>
+        <path d="M 142 125 Q 170 160 162 210 L 150 205 Q 148 175 138 155 Z" fill="#1a73e8" opacity="0.85"/>
+      </svg>
+      <span class="nav-v2-name">ASTROBOT</span>
+    </a>
+
+    <ul class="nav-v2-links" id="navLinks">
+      <li><a href="#home" class="nav-v2-link active" data-page="home">Home</a></li>
+      <li><a href="#features" class="nav-v2-link" data-page="features">Features</a></li>
+      <li><a href="#about" class="nav-v2-link" data-page="about">About</a></li>
+      <li class="nav-v2-mobile-ctas">
+        <a href="#" class="btn btn-outline btn-sm" id="mobileLoginBtn">Login</a>
+        <a href="register.html" class="btn btn-orange btn-sm">Get Started</a>
+      </li>
+    </ul>
+
+    <div class="nav-v2-actions">
+      <a href="#" class="btn btn-outline btn-sm" id="ctaLoginBtn">Login</a>
+      <a href="register.html" class="btn btn-orange btn-sm">Get Started</a>
+    </div>
+
+    <button class="nav-v2-burger" id="navBurger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       HERO (central chat bar)
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="home" class="hero-v2 page page-active" aria-label="Hero">
+    <div class="hero-v2-inner">
+
+      <div class="hero-v2-badge">
+        <span class="hero-v2-badge-dot" aria-hidden="true"></span>
+        <span>V2.0 Online · Powered by AI</span>
+      </div>
+
+      <h1 class="hero-v2-title">
+        Meet <span class="hero-v2-title-grad">AstroBot</span><br/>
+        Your Intelligent Space Assistant
+      </h1>
+
+      <p class="hero-v2-sub">
+        Ask anything — from mission planning to the mysteries of the universe.
+        AstroBot is your AI-powered companion, available around the clock.
+      </p>
+
+      <!-- CENTRAL CHAT BAR -->
+      <form class="hero-chatbar" id="heroChatForm" autocomplete="off">
+        <div class="hero-chatbar-inner">
+          <svg class="hero-chatbar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <input
+            type="text"
+            id="heroChatInput"
+            class="hero-chatbar-input"
+            placeholder="Ask AstroBot anything..."
+            maxlength="500"
+            aria-label="Ask AstroBot"
+          />
+          <button type="submit" class="hero-chatbar-send" aria-label="Send message">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+            <span>Send</span>
+          </button>
+        </div>
+        <div class="hero-chatbar-hint">
+          <kbd>Enter</kbd> to send · Login required to start a mission
+        </div>
+      </form>
+
+      <!-- Suggestion chips -->
+      <div class="hero-v2-chips" aria-label="Suggested prompts">
+        <button class="hero-v2-chip" data-prompt="Tell me something amazing about space">
+          🌌 Amazing space fact
+        </button>
+        <button class="hero-v2-chip" data-prompt="How does AI actually work?">
+          🤖 How does AI work?
+        </button>
+        <button class="hero-v2-chip" data-prompt="Plan a mission to Mars">
+          🚀 Mission to Mars
+        </button>
+        <button class="hero-v2-chip" data-prompt="Explain quantum computing simply">
+          ⚛️ Quantum computing
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="hero-v2-stats" aria-label="Statistics">
+        <div class="hero-v2-stat">
+          <span class="hero-v2-stat-val">24/7</span>
+          <span class="hero-v2-stat-lab">Available</span>
+        </div>
+        <div class="hero-v2-stat-sep" aria-hidden="true"></div>
+        <div class="hero-v2-stat">
+          <span class="hero-v2-stat-val">100+</span>
+          <span class="hero-v2-stat-lab">Users</span>
+        </div>
+        <div class="hero-v2-stat-sep" aria-hidden="true"></div>
+        <div class="hero-v2-stat">
+          <span class="hero-v2-stat-val">AI</span>
+          <span class="hero-v2-stat-lab">Powered</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decorative orbit rings -->
+    <div class="hero-v2-orbit hero-v2-orbit-1" aria-hidden="true"></div>
+    <div class="hero-v2-orbit hero-v2-orbit-2" aria-hidden="true"></div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       FEATURES
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="features" class="features-v2 page" aria-label="Features" hidden>
+    <div class="section-head">
+      <div class="section-eyebrow">Capabilities</div>
+      <h2 class="section-title">Built for <span class="section-title-grad">Commanders</span></h2>
+      <p class="section-sub">
+        A conversational AI co-pilot trained to help you explore, plan, and solve.
+      </p>
+    </div>
+
+    <div class="features-v2-grid">
+      <div class="feature-v2-card glass-card">
+        <div class="feature-v2-icon feature-v2-icon-cyan">⚡</div>
+        <h3 class="feature-v2-title">Instant Responses</h3>
+        <p class="feature-v2-desc">Sub-second answers powered by cutting-edge language models and retrieval systems.</p>
+      </div>
+      <div class="feature-v2-card glass-card">
+        <div class="feature-v2-icon feature-v2-icon-blue">🔒</div>
+        <h3 class="feature-v2-title">Secure &amp; Private</h3>
+        <p class="feature-v2-desc">JWT-based auth, hashed passwords, rate-limited APIs. Your missions stay classified.</p>
+      </div>
+      <div class="feature-v2-card glass-card">
+        <div class="feature-v2-icon feature-v2-icon-orange">🌐</div>
+        <h3 class="feature-v2-title">Space-grade AI</h3>
+        <p class="feature-v2-desc">Trained on vast knowledge plus n8n workflows to tackle any challenge you throw at it.</p>
+      </div>
+      <div class="feature-v2-card glass-card">
+        <div class="feature-v2-icon feature-v2-icon-green">🎨</div>
+        <h3 class="feature-v2-title">Image Generation</h3>
+        <p class="feature-v2-desc">Need a visual? AstroBot generates images on demand via Stable Diffusion.</p>
+      </div>
+      <div class="feature-v2-card glass-card">
+        <div class="feature-v2-icon feature-v2-icon-cyan">🎙️</div>
+        <h3 class="feature-v2-title">Voice Input</h3>
+        <p class="feature-v2-desc">Record audio directly in-app and get answers hands-free during your mission.</p>
+      </div>
+      <div class="feature-v2-card glass-card">
+        <div class="feature-v2-icon feature-v2-icon-blue">📋</div>
+        <h3 class="feature-v2-title">Full History</h3>
+        <p class="feature-v2-desc">Every conversation is saved and searchable so you never lose a thread.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       ABOUT (team + graduation project)
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="about" class="about-v2 page" aria-label="About" hidden>
+    <div class="section-head">
+      <div class="section-eyebrow">About the Project</div>
+      <h2 class="section-title">A <span class="section-title-grad">Graduation</span> Project</h2>
+      <p class="section-sub">
+        AstroBot is a university graduation project built by four students passionate about AI,
+        automation, and clean engineering. It combines a modern web stack (Node.js, Express,
+        PostgreSQL) with an n8n automation backbone and Stable Diffusion for image generation —
+        all wrapped in a space-themed conversational UI.
+      </p>
+    </div>
+
+    <div class="about-v2-meta glass-card">
+      <div class="about-v2-meta-item">
+        <span class="about-v2-meta-label">Type</span>
+        <span class="about-v2-meta-value">Graduation Project</span>
+      </div>
+      <div class="about-v2-meta-item">
+        <span class="about-v2-meta-label">Stack</span>
+        <span class="about-v2-meta-value">Node.js · Express · PostgreSQL · n8n</span>
+      </div>
+      <div class="about-v2-meta-item">
+        <span class="about-v2-meta-label">AI</span>
+        <span class="about-v2-meta-value">LLM + Stable Diffusion</span>
+      </div>
+      <div class="about-v2-meta-item">
+        <span class="about-v2-meta-label">Version</span>
+        <span class="about-v2-meta-value">V2.0 — 2026</span>
+      </div>
+    </div>
+
+    <div class="team-head">
+      <h3 class="team-title">The Team</h3>
+      <p class="team-sub">Built together by four developers</p>
+    </div>
+
+    <div class="team-grid">
+
+      <div class="team-card glass-card">
+        <div class="team-avatar" data-initials="TK">TK</div>
+        <div class="team-name">Tidiane Konaté</div>
+        <div class="team-role">Developer</div>
+      </div>
+
+      <div class="team-card glass-card">
+        <div class="team-avatar" data-initials="SM">SM</div>
+        <div class="team-name">Sidi Mohamed Sall</div>
+        <div class="team-role">Developer</div>
+      </div>
+
+      <div class="team-card glass-card">
+        <div class="team-avatar" data-initials="AE">AE</div>
+        <div class="team-name">Ahmed Essalem</div>
+        <div class="team-role">Developer</div>
+      </div>
+
+      <div class="team-card glass-card">
+        <div class="team-avatar" data-initials="SI">SI</div>
+        <div class="team-name">Saad Ibrahim Houssein</div>
+        <div class="team-role">Developer</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════ -->
+  <footer class="footer-v2" aria-label="Footer">
+    <div class="footer-v2-inner">
+      <div class="footer-v2-left">
+        <div class="footer-v2-brand">
+          <svg width="24" height="24" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="55" y="38" width="90" height="70" rx="20" fill="#b8d9f0"/>
+            <rect x="66" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
+            <rect x="106" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
+            <rect x="68" y="57" width="24" height="14" rx="4" fill="#00d4ff"/>
+            <rect x="108" y="57" width="24" height="14" rx="4" fill="#00d4ff"/>
+            <rect x="50" y="118" width="100" height="80" rx="22" fill="#b8d9f0"/>
+          </svg>
+          <span>ASTROBOT</span>
+        </div>
+        <p class="footer-v2-tag">Your intelligent space assistant · University graduation project</p>
+      </div>
+      <div class="footer-v2-right">
+        <a href="#home" class="footer-v2-link">Home</a>
+        <a href="#features" class="footer-v2-link">Features</a>
+        <a href="#about" class="footer-v2-link">About</a>
+      </div>
+    </div>
+    <div class="footer-v2-bottom">
+      © 2026 AstroBot · All systems operational
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       LOGIN MODAL (triggered by chat send / login buttons)
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="auth-modal" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <div class="auth-modal-card glass-card">
+      <button class="auth-modal-close" id="authModalClose" aria-label="Close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <div class="auth-modal-head">
+        <svg width="44" height="50" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <defs>
-            <radialGradient id="nb-body" cx="40%" cy="30%" r="70%">
+            <radialGradient id="am-body" cx="40%" cy="30%" r="70%">
               <stop offset="0%" stop-color="#fff"/>
               <stop offset="100%" stop-color="#b8d9f0"/>
             </radialGradient>
-            <radialGradient id="nb-eye" cx="35%" cy="30%" r="65%">
+            <radialGradient id="am-eye" cx="35%" cy="30%" r="65%">
               <stop offset="0%" stop-color="#80deea"/>
               <stop offset="100%" stop-color="#006064"/>
             </radialGradient>
           </defs>
           <line x1="100" y1="10" x2="100" y2="40" stroke="#4dd0e1" stroke-width="3" stroke-linecap="round"/>
-          <circle cx="100" cy="8" r="6" fill="#00d4ff"/>
-          <rect x="55" y="38" width="90" height="70" rx="20" fill="url(#nb-body)"/>
+          <circle cx="100" cy="8" r="6" fill="#00d4ff">
+            <animate attributeName="opacity" values="0.8;1;0.8" dur="1.8s" repeatCount="indefinite"/>
+          </circle>
+          <rect x="55" y="38" width="90" height="70" rx="20" fill="url(#am-body)"/>
           <rect x="66" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
           <rect x="106" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
-          <rect x="68" y="57" width="24" height="14" rx="4" fill="#00d4ff" opacity="0.9"/>
-          <rect x="108" y="57" width="24" height="14" rx="4" fill="#00d4ff" opacity="0.9"/>
-          <rect x="50" y="118" width="100" height="80" rx="22" fill="url(#nb-body)"/>
+          <rect x="68" y="57" width="24" height="14" rx="4" fill="url(#am-eye)"/>
+          <rect x="108" y="57" width="24" height="14" rx="4" fill="url(#am-eye)"/>
+          <rect x="50" y="118" width="100" height="80" rx="22" fill="url(#am-body)"/>
           <path d="M 58 125 Q 30 160 38 210 L 50 205 Q 52 175 62 155 Z" fill="#1a73e8" opacity="0.85"/>
+          <path d="M 142 125 Q 170 160 162 210 L 150 205 Q 148 175 138 155 Z" fill="#1a73e8" opacity="0.85"/>
         </svg>
-        <span class="nav-logo-name">ASTROBOT</span>
-      </a>
-      <div class="nav-actions">
-        <a href="login.html" class="btn btn-outline btn-sm">Login</a>
-        <a href="register.html" class="btn btn-orange btn-sm">Get Started</a>
+        <h2 id="authModalTitle" class="auth-modal-title">Welcome, Commander</h2>
+        <p class="auth-modal-sub" id="authModalSub">Login to start your mission with AstroBot.</p>
       </div>
-    </nav>
 
-    <div class="landing-body">
-      <!-- Hero section -->
-      <section class="landing-hero" aria-label="Hero section">
+      <div class="auth-modal-alert" id="authModalAlert" role="alert"></div>
 
-        <!-- Left: content -->
-        <div class="hero-content">
-          <div class="hero-badge">
-            <span class="badge-dot" aria-hidden="true"></span>
-            V1.0 Online
-          </div>
-
-          <h1 class="hero-title">
-            Your Intelligent<br>
-            <span>Space Assistant</span>
-          </h1>
-
-          <p class="hero-desc">
-            AstroBot is your AI-powered companion for any question, mission, or challenge.
-            Available around the clock, built for commanders like you.
-          </p>
-
-          <div class="hero-actions">
-            <a href="login.html" class="btn btn-primary">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                <polyline points="10 17 15 12 10 7"/>
-                <line x1="15" y1="12" x2="3" y2="12"/>
+      <form id="authModalForm" class="auth-modal-form" novalidate>
+        <div class="input-group">
+          <label for="modalEmail">Email Address</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <polyline points="2,4 12,13 22,4"/>
               </svg>
-              Login
-            </a>
-            <a href="register.html" class="btn btn-orange">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-                <line x1="19" y1="8" x2="19" y2="14"/>
-                <line x1="16" y1="11" x2="22" y2="11"/>
-              </svg>
-              Get Started
-            </a>
-          </div>
-
-          <div class="hero-stats" aria-label="Statistics">
-            <div class="stat-item">
-              <span class="stat-value">100+</span>
-              <span class="stat-label">Users</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">24/7</span>
-              <span class="stat-label">Online</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">AI</span>
-              <span class="stat-label">Powered</span>
-            </div>
+            </span>
+            <input type="email" id="modalEmail" class="input-field" placeholder="commander@space.io" autocomplete="email" required />
           </div>
         </div>
 
-        <!-- Right: Robot character -->
-        <div class="hero-visual" aria-hidden="true">
-          <div class="robot-container" id="robotContainer">
-            <div class="robot-glow"></div>
-            <div class="orbit-ring orbit-ring-1"></div>
-            <div class="orbit-ring orbit-ring-2"></div>
+        <div class="input-group">
+          <label for="modalPassword">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon" aria-hidden="true">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
+            <input type="password" id="modalPassword" class="input-field has-toggle" placeholder="••••••••••" autocomplete="current-password" required />
+            <button type="button" class="input-toggle" id="modalPwdToggle" aria-label="Toggle password">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
 
-            <!-- Large AstroBot SVG 280x320 -->
-            <svg id="robotSvg" viewBox="0 0 200 240" width="280" height="320" xmlns="http://www.w3.org/2000/svg" aria-label="AstroBot robot character" role="img" style="cursor:default;overflow:visible;">
-              <defs>
-                <radialGradient id="hb-body" cx="40%" cy="30%" r="70%">
-                  <stop offset="0%" stop-color="#ffffff"/>
-                  <stop offset="60%" stop-color="#e8f4fd"/>
-                  <stop offset="100%" stop-color="#b8d9f0"/>
-                </radialGradient>
-                <radialGradient id="hb-eye" cx="35%" cy="30%" r="65%">
-                  <stop offset="0%" stop-color="#80deea"/>
-                  <stop offset="40%" stop-color="#00d4ff"/>
-                  <stop offset="100%" stop-color="#006064"/>
-                </radialGradient>
-                <linearGradient id="hb-cape" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#1a73e8"/>
-                  <stop offset="100%" stop-color="#0d47a1"/>
-                </linearGradient>
-                <filter id="hb-glow" x="-30%" y="-30%" width="160%" height="160%">
-                  <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
-                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-                <linearGradient id="hb-shine" x1="0%" y1="0%" x2="50%" y2="100%">
-                  <stop offset="0%" stop-color="#fff" stop-opacity="0.5"/>
-                  <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-
-              <!-- ── HEAD GROUP ── -->
-              <g id="robotHead">
-                <!-- Antenna -->
-                <line x1="100" y1="10" x2="100" y2="40" stroke="#4dd0e1" stroke-width="3" stroke-linecap="round"/>
-                <circle cx="100" cy="8" r="6" fill="#00d4ff" filter="url(#hb-glow)">
-                  <animate attributeName="r" values="5;7;5" dur="1.8s" repeatCount="indefinite"/>
-                  <animate attributeName="opacity" values="0.8;1;0.8" dur="1.8s" repeatCount="indefinite"/>
-                </circle>
-                <circle cx="100" cy="8" r="3" fill="white" opacity="0.8"/>
-                <!-- Head -->
-                <rect x="55" y="38" width="90" height="70" rx="20" fill="url(#hb-body)" filter="url(#hb-glow)"/>
-                <ellipse cx="86" cy="50" rx="22" ry="10" fill="url(#hb-shine)" opacity="0.7"/>
-                <!-- Ear sensors -->
-                <rect x="42" y="58" width="14" height="24" rx="7" fill="url(#hb-body)" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
-                <circle cx="49" cy="70" r="4" fill="rgba(0,212,255,0.5)">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" repeatCount="indefinite"/>
-                </circle>
-                <rect x="144" y="58" width="14" height="24" rx="7" fill="url(#hb-body)" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
-                <circle cx="151" cy="70" r="4" fill="rgba(0,212,255,0.5)">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="3s" begin="1.5s" repeatCount="indefinite"/>
-                </circle>
-                <!-- Eyes -->
-                <rect x="66" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
-                <rect x="106" y="55" width="28" height="18" rx="5" fill="#0d1b35"/>
-                <rect x="68" y="57" width="24" height="14" rx="4" fill="url(#hb-eye)" filter="url(#hb-glow)" stroke="rgba(0,212,255,0.9)" stroke-width="1.5"/>
-                <rect x="108" y="57" width="24" height="14" rx="4" fill="url(#hb-eye)" filter="url(#hb-glow)" stroke="rgba(0,212,255,0.9)" stroke-width="1.5"/>
-                <!-- Eye glints (shift to follow cursor) -->
-                <rect id="eyeGlintL" x="70" y="59" width="8" height="5" rx="2" fill="white" opacity="0.7"/>
-                <rect id="eyeGlintR" x="110" y="59" width="8" height="5" rx="2" fill="white" opacity="0.7"/>
-                <!-- Eye glow halos -->
-                <rect x="65" y="54" width="30" height="20" rx="6" fill="none" stroke="rgba(0,212,255,0.3)" stroke-width="2.5">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" repeatCount="indefinite"/>
-                </rect>
-                <rect x="105" y="54" width="30" height="20" rx="6" fill="none" stroke="rgba(0,212,255,0.3)" stroke-width="2.5">
-                  <animate attributeName="opacity" values="0.4;1;0.4" dur="2.5s" begin="0.4s" repeatCount="indefinite"/>
-                </rect>
-                <!-- Mouth / speaker grille -->
-                <rect x="82" y="82" width="36" height="8" rx="4" fill="rgba(0,10,30,0.55)"/>
-                <rect x="86" y="84" width="8" height="4" rx="2" fill="#00d4ff" opacity="0.6"/>
-                <rect x="97" y="84" width="8" height="4" rx="2" fill="#00d4ff" opacity="0.6"/>
-                <rect x="108" y="84" width="6" height="4" rx="2" fill="#00d4ff" opacity="0.4"/>
-              </g>
-              <!-- ── END HEAD GROUP ── -->
-
-              <!-- Neck -->
-              <rect x="88" y="108" width="24" height="12" rx="4" fill="#dce8f0"/>
-              <rect x="88" y="111" width="24" height="3" rx="1.5" fill="rgba(0,212,255,0.3)"/>
-              <!-- Body -->
-              <rect x="50" y="118" width="100" height="80" rx="22" fill="url(#hb-body)" filter="url(#hb-glow)"/>
-              <ellipse cx="80" cy="128" rx="18" ry="9" fill="url(#hb-shine)" opacity="0.6"/>
-              <!-- Chest panel -->
-              <rect x="70" y="132" width="60" height="45" rx="10" fill="rgba(0,180,216,0.12)" stroke="rgba(0,212,255,0.35)" stroke-width="1"/>
-              <circle cx="100" cy="148" r="10" fill="none" stroke="#00d4ff" stroke-width="2"/>
-              <circle cx="100" cy="148" r="5" fill="url(#hb-eye)" filter="url(#hb-glow)">
-                <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
-              </circle>
-              <circle cx="100" cy="148" r="2" fill="white"/>
-              <!-- Chest lights -->
-              <rect x="76" y="164" width="8" height="6" rx="3" fill="#1a73e8" opacity="0.7"/>
-              <rect x="88" y="164" width="8" height="6" rx="3" fill="#00d4ff" opacity="0.7"/>
-              <rect x="100" y="164" width="8" height="6" rx="3" fill="#1a73e8" opacity="0.7"/>
-              <rect x="112" y="164" width="8" height="6" rx="3" fill="#f4a623" opacity="0.7"/>
-              <!-- Cape -->
-              <path d="M 58 125 Q 30 160 38 210 L 50 205 Q 52 175 62 155 Z" fill="#1a73e8" opacity="0.85"/>
-              <path d="M 142 125 Q 170 160 162 210 L 150 205 Q 148 175 138 155 Z" fill="#1a73e8" opacity="0.85"/>
-              <!-- Left arm -->
-              <rect x="28" y="122" width="22" height="55" rx="11" fill="url(#hb-body)"/>
-              <circle cx="39" cy="182" r="10" fill="#e0f0ff"/>
-              <circle cx="39" cy="182" r="5" fill="#1a73e8"/>
-              <!-- Right arm -->
-              <rect x="150" y="122" width="22" height="55" rx="11" fill="url(#hb-body)"/>
-              <circle cx="161" cy="182" r="10" fill="#e0f0ff"/>
-              <circle cx="161" cy="182" r="5" fill="#1a73e8"/>
-              <!-- Left leg -->
-              <rect x="68" y="196" width="26" height="38" rx="13" fill="url(#hb-body)"/>
-              <circle cx="81" cy="236" r="10" fill="#e0f0ff"/>
-              <circle cx="81" cy="236" r="5" fill="#00d4ff"/>
-              <!-- Right leg -->
-              <rect x="106" y="196" width="26" height="38" rx="13" fill="url(#hb-body)"/>
-              <circle cx="119" cy="236" r="10" fill="#e0f0ff"/>
-              <circle cx="119" cy="236" r="5" fill="#00d4ff"/>
+        <button type="submit" class="btn btn-orange" id="modalSubmitBtn" style="width:100%;justify-content:center;margin-top:4px;">
+          <span id="modalBtnText" style="display:flex;align-items:center;gap:8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
             </svg>
-          </div>
-        </div>
-      </section>
+            Launch Mission
+          </span>
+          <span id="modalBtnSpinner" style="display:none;"><span class="spinner"></span></span>
+        </button>
+      </form>
 
-      <!-- Features strip -->
-      <section class="features-strip" aria-label="Features">
-        <div class="feature-card">
-          <span class="feature-icon">⚡</span>
-          <div class="feature-title">Instant Responses</div>
-          <div class="feature-desc">Sub-second answers powered by advanced AI systems</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">🔒</span>
-          <div class="feature-title">Secure &amp; Private</div>
-          <div class="feature-desc">End-to-end encryption keeps your missions classified</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">🌐</span>
-          <div class="feature-title">Space-grade AI</div>
-          <div class="feature-desc">Trained on vast knowledge to tackle any challenge</div>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon">📋</span>
-          <div class="feature-title">Full History</div>
-          <div class="feature-desc">All your conversations saved and accessible anytime</div>
-        </div>
-      </section>
-
-      <!-- Footer -->
-      <footer class="landing-footer-bar" aria-label="Footer">
-        © 2026 AstroBot &middot; Built by Tidiane Konaté &middot; All systems operational
-      </footer>
+      <div class="auth-modal-foot">
+        Don't have an account? <a href="register.html">Create one</a>
+      </div>
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════════
+       SCRIPTS
+       ═══════════════════════════════════════════════════════════════ -->
   <script>
-    // Redirect if already logged in
-    const t = localStorage.getItem('astrobot_token');
-    const u = localStorage.getItem('astrobot_user');
-    if (t && u) {
-      window.location.href = 'chat.html';
-    }
-  </script>
-
-  <script>
-    // ── Robot click: superhero takeoff animation ──
+    // ── If already logged in, go straight to chat ──────────────────
     (function () {
-      const container = document.getElementById('robotContainer');
-      if (!container) return;
-
-      let isAnimating = false;
-
-      // Helper: create a DOM element with inline styles, appended to a parent
-      function make(tag, css, parent) {
-        const el = document.createElement(tag);
-        el.style.cssText = css;
-        (parent || document.body).appendChild(el);
-        return el;
-      }
-      function later(el, ms) {
-        setTimeout(function () { el && el.parentNode && el.remove(); }, ms);
-      }
-
-      function launch() {
-        if (isAnimating) return;
-        isAnimating = true;
-
-        // ── Stop float, start circle-flight keyframe ──
-        container.style.animation = 'none';
-        container.offsetHeight; // force reflow
-        container.classList.add('robot-animating');
-
-        // ── Shockwave at feet (t=0) ──
-        const sw = make('div',
-          'position:absolute;bottom:-5px;left:50%;' +
-          'border-radius:50%;border:2px solid rgba(0,212,255,0.85);' +
-          'background:rgba(0,212,255,0.12);pointer-events:none;z-index:5;' +
-          'animation:robotShockwave 0.55s ease-out forwards;',
-          container);
-        later(sw, 650);
-
-        // ── Thruster flames below the feet (t=500ms) ──
-        // SVG 280×320; left foot cx=81→x=113px, right cx=119→x=167px; cy=236→y=314px
-        setTimeout(function () {
-          [102, 156].forEach(function (lx, i) {
-            const fl = make('div',
-              'position:absolute;top:313px;left:' + lx + 'px;' +
-              'width:22px;height:58px;pointer-events:none;z-index:5;' +
-              'transform-origin:top center;border-radius:0 0 11px 11px;' +
-              'background:linear-gradient(to bottom,#fff 0%,#ffdd00 25%,#ff6600 60%,transparent 100%);' +
-              'filter:blur(1.5px);opacity:0.94;' +
-              'animation:thrusterBurn 0.12s ease-in-out infinite;' +
-              'animation-delay:' + (i * 0.06) + 's;',
-              container);
-            later(fl, 500); // thrusters visible only during activation phase
-          });
-        }, 500);
-
-        // ── Real-time trail particles along the circular path (t=800ms–3100ms) ──
-        const symbols = ['✦', '✧', '⋆', '·', '✦'];
-        let symIdx = 0;
-        const trailInterval = setInterval(function () {
-          const r = container.getBoundingClientRect();
-          const cx = r.left + r.width  * 0.5;
-          const cy = r.top  + r.height * 0.45;
-          const offX = (Math.random() - 0.5) * 30;
-          const offY = (Math.random() - 0.5) * 30;
-          const sym = symbols[symIdx++ % symbols.length];
-          const col = symIdx % 2 === 0 ? '#00d4ff' : '#ffffff';
-          const sz  = 10 + Math.floor(Math.random() * 7);
-          const star = make('div',
-            'position:fixed;z-index:999;pointer-events:none;' +
-            'top:'  + (cy + offY) + 'px;' +
-            'left:' + (cx + offX) + 'px;' +
-            'font-size:' + sz + 'px;color:' + col + ';' +
-            'animation:trailStarPop 0.65s ease-out forwards;');
-          star.textContent = sym;
-          later(star, 750);
-        }, 260);
-        setTimeout(function () { clearInterval(trailInterval); }, 3100);
-
-        // ── Landing shockwave (t=3200ms, 80% mark = robot back home) ──
-        setTimeout(function () {
-          const lf = make('div',
-            'position:absolute;bottom:-5px;left:50%;' +
-            'border-radius:50%;border:2px solid rgba(0,212,255,0.9);' +
-            'background:radial-gradient(circle,rgba(0,212,255,0.35) 0%,transparent 70%);' +
-            'pointer-events:none;z-index:5;' +
-            'animation:landingFlash 0.55s ease-out forwards;',
-            container);
-          later(lf, 650);
-        }, 3200);
-
-        // ── Reset: resume normal float (t=4000ms) ──
-        setTimeout(function () {
-          container.classList.remove('robot-animating');
-          container.style.animation = '';
-          isAnimating = false;
-        }, 4000);
-      }
-
-      container.addEventListener('click', launch);
-      // Touch support
-      container.addEventListener('touchstart', function (e) {
-        e.preventDefault();
-        launch();
-      }, { passive: false });
+      const t = localStorage.getItem('astrobot_token');
+      const u = localStorage.getItem('astrobot_user');
+      if (t && u) window.location.href = 'chat.html';
     })();
+
+    // ── Helpers ────────────────────────────────────────────────────
+    const $ = (id) => document.getElementById(id);
+    function showToast(msg, type) {
+      const c = $('toastContainer');
+      const el = document.createElement('div');
+      el.className = 'toast toast-' + (type || 'info');
+      el.textContent = msg;
+      c.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+
+    // ── SPA-style page switching (Home / Features / About) ────────
+    const PAGES = ['home', 'features', 'about'];
+    const navBurger = $('navBurger');
+
+    function closeMobileMenu() {
+      $('navLinks').classList.remove('open');
+      navBurger.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('mobile-menu-open');
+    }
+
+    function showPage(pageId) {
+      if (!PAGES.includes(pageId)) pageId = 'home';
+      PAGES.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const on = id === pageId;
+        el.hidden = !on;
+        el.classList.toggle('page-active', on);
+      });
+      document.querySelectorAll('.nav-v2-link[data-page]').forEach(l => {
+        l.classList.toggle('active', l.dataset.page === pageId);
+      });
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' in window ? 'instant' : 'auto' });
+      if (location.hash !== '#' + pageId) {
+        history.replaceState(null, '', '#' + pageId);
+      }
+      closeMobileMenu();
+    }
+
+    // Init from URL hash
+    const initialHash = (location.hash || '#home').replace('#', '');
+    showPage(initialHash);
+
+    // Handle back/forward
+    window.addEventListener('hashchange', () => {
+      const p = (location.hash || '#home').replace('#', '');
+      showPage(p);
+    });
+
+    // Nav link clicks
+    document.querySelectorAll('.nav-v2-link[data-page]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        showPage(link.dataset.page);
+      });
+    });
+
+    // Brand link goes to Home
+    document.querySelector('.nav-v2-brand').addEventListener('click', (e) => {
+      e.preventDefault();
+      showPage('home');
+    });
+
+    // Footer links
+    document.querySelectorAll('.footer-v2-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href') || '';
+        if (href.startsWith('#')) {
+          const p = href.replace('#', '');
+          if (PAGES.includes(p)) { e.preventDefault(); showPage(p); }
+        }
+      });
+    });
+
+    // ── Mobile burger ──────────────────────────────────────────────
+    navBurger.addEventListener('click', () => {
+      const links = $('navLinks');
+      const open = links.classList.toggle('open');
+      navBurger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      document.body.classList.toggle('mobile-menu-open', open);
+    });
+
+    // ── Login modal ────────────────────────────────────────────────
+    const authModal = $('authModal');
+    const authModalSub = $('authModalSub');
+    function openAuthModal(subtitle) {
+      if (subtitle) authModalSub.textContent = subtitle;
+      else authModalSub.textContent = 'Login to start your mission with AstroBot.';
+      authModal.classList.add('show');
+      setTimeout(() => $('modalEmail').focus(), 150);
+    }
+    function closeAuthModal() {
+      authModal.classList.remove('show');
+      $('authModalAlert').className = 'auth-modal-alert';
+      $('authModalAlert').textContent = '';
+    }
+    $('authModalClose').addEventListener('click', closeAuthModal);
+    authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAuthModal(); });
+    $('ctaLoginBtn').addEventListener('click', (e) => { e.preventDefault(); openAuthModal(); });
+    $('mobileLoginBtn').addEventListener('click', (e) => { e.preventDefault(); closeMobileMenu(); openAuthModal(); });
+
+    // Password toggle
+    $('modalPwdToggle').addEventListener('click', () => {
+      const p = $('modalPassword');
+      p.type = p.type === 'password' ? 'text' : 'password';
+    });
+
+    // ── Chat bar: store pending message, trigger login if needed ───
+    const heroForm = $('heroChatForm');
+    const heroInput = $('heroChatInput');
+
+    function handleHeroSubmit(prompt) {
+      const msg = (prompt || heroInput.value || '').trim();
+      if (!msg) { heroInput.focus(); return; }
+      // Store for post-login delivery to chat page
+      sessionStorage.setItem('astrobot_pending_message', msg);
+      openAuthModal('Login to send "' + (msg.length > 40 ? msg.slice(0, 40) + '…' : msg) + '"');
+    }
+
+    heroForm.addEventListener('submit', (e) => { e.preventDefault(); handleHeroSubmit(); });
+
+    // Suggestion chips
+    document.querySelectorAll('.hero-v2-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const p = chip.getAttribute('data-prompt') || chip.textContent.trim();
+        heroInput.value = p;
+        handleHeroSubmit(p);
+      });
+    });
+
+    // ── Submit login form ──────────────────────────────────────────
+    const modalForm = $('authModalForm');
+    const modalAlert = $('authModalAlert');
+    const modalSubmit = $('modalSubmitBtn');
+    const modalBtnText = $('modalBtnText');
+    const modalBtnSpin = $('modalBtnSpinner');
+
+    function showModalAlert(msg, type) {
+      modalAlert.className = 'auth-modal-alert show alert-' + (type || 'error');
+      modalAlert.textContent = msg;
+    }
+
+    modalForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      modalAlert.className = 'auth-modal-alert';
+      modalAlert.textContent = '';
+
+      const email = $('modalEmail').value.trim();
+      const password = $('modalPassword').value;
+      if (!email) { showModalAlert('Please enter your email.'); return; }
+      if (!password) { showModalAlert('Please enter your password.'); return; }
+
+      modalSubmit.disabled = true;
+      modalBtnText.style.display = 'none';
+      modalBtnSpin.style.display = 'inline-block';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (data.success || data.token) {
+          localStorage.setItem('astrobot_token', data.token);
+          localStorage.setItem('astrobot_user', JSON.stringify(data.user));
+          showToast('Welcome, Commander ' + data.user.name + '!', 'success');
+          setTimeout(() => { window.location.href = 'chat.html'; }, 600);
+        } else {
+          showModalAlert(data.message || data.error || 'Invalid credentials.');
+          modalSubmit.disabled = false;
+          modalBtnText.style.display = 'flex';
+          modalBtnSpin.style.display = 'none';
+        }
+      } catch (err) {
+        showModalAlert('Connection error. Please try again.');
+        modalSubmit.disabled = false;
+        modalBtnText.style.display = 'flex';
+        modalBtnSpin.style.display = 'none';
+      }
+    });
+
+    // ── Shooting stars (subtle ambient) ────────────────────────────
+    (function () {
+      const NUM = 4;
+      for (let i = 0; i < NUM; i++) {
+        const el = document.createElement('div');
+        el.className = 'shooting-star';
+        document.body.appendChild(el);
+        function launch() {
+          const startX = Math.random() * window.innerWidth;
+          const startY = Math.random() * window.innerHeight * 0.5;
+          const angle = 15 + Math.random() * 25;
+          const dist = 250 + Math.random() * 450;
+          const rad = angle * Math.PI / 180;
+          const tx = Math.cos(rad) * dist;
+          const ty = Math.sin(rad) * dist;
+          const dur = 1.4 + Math.random() * 1.8;
+          el.style.cssText = 'position:fixed;top:' + startY + 'px;left:' + startX + 'px;opacity:0;z-index:0;pointer-events:none;--angle:' + angle + 'deg;--tx:' + tx + 'px;--ty:' + ty + 'px;animation:shoot ' + dur + 's linear forwards;';
+          el.addEventListener('animationend', () => {
+            el.style.animation = 'none';
+            setTimeout(launch, 4000 + Math.random() * 8000);
+          }, { once: true });
+        }
+        setTimeout(launch, i * 3500 + Math.random() * 4000);
+      }
+    })();
+
+    // ── Nav background on scroll ───────────────────────────────────
+    const nav = document.querySelector('.nav-v2');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('nav-v2-scrolled', window.scrollY > 20);
+    }, { passive: true });
   </script>
 </body>
 </html>

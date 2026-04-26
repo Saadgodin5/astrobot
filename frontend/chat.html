@@ -8,10 +8,36 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&family=Exo+2:wght@300;400;600&display=swap" />
-  <link rel="stylesheet" href="style.css" />
+  <!-- KaTeX for LaTeX math rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <!-- highlight.js for code syntax highlighting (dark default; light variant loaded on demand) -->
+  <link rel="stylesheet" id="hljsTheme" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css" />
+  <link rel="stylesheet" href="style.css?v=3.0" />
   <style>
-    html, body { height: 100%; overflow: hidden; }
+    html, body {
+      height: 100%;
+      height: 100dvh;
+      height: calc(var(--app-vh, 1vh) * 100);
+      overflow: hidden;
+      margin: 0;
+    }
   </style>
+  <script>
+    // iOS-safe viewport height: window.innerHeight always reflects the currently
+    // visible area (unlike 100vh / 100dvh which can be stale on Safari).
+    (function () {
+      function setAppVH() {
+        var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+        document.documentElement.style.setProperty('--app-vh', (h * 0.01) + 'px');
+      }
+      setAppVH();
+      window.addEventListener('resize', setAppVH);
+      window.addEventListener('orientationchange', setAppVH);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', setAppVH);
+      }
+    })();
+  </script>
 </head>
 <body>
 
@@ -135,11 +161,12 @@
     </div>
   </div>
 
-  <!-- Chat app layout -->
-  <div class="chat-app">
+  <!-- Sidebar overlay backdrop (mobile only) -->
+  <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
 
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar" aria-label="Navigation sidebar">
+  <!-- Sidebar: direct body child (on mobile it's a drawer,
+       on desktop it's fixed at the left with chat-app shifted right) -->
+  <aside class="sidebar" id="sidebar" aria-label="Navigation sidebar">
 
       <!-- Header -->
       <div class="sidebar-header">
@@ -169,6 +196,13 @@
           <path d="M 142 125 Q 170 160 162 210 L 150 205 Q 148 175 138 155 Z" fill="#1a73e8" opacity="0.85"/>
         </svg>
         <span class="sidebar-logo-name">ASTROBOT</span>
+        <!-- Close button (mobile drawer only) -->
+        <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Close menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
 
       <!-- User section -->
@@ -196,6 +230,20 @@
           New Chat
         </button>
 
+        <!-- Search history -->
+        <div class="sidebar-search">
+          <svg class="sidebar-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" class="sidebar-search-input" id="sidebarSearch" placeholder="Search history..." aria-label="Search chat history" />
+          <button class="sidebar-search-clear" id="sidebarSearchClear" aria-label="Clear search" hidden>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
         <div class="nav-section-label">History</div>
         <div class="history-list" id="historyList">
           <div class="history-empty">
@@ -216,13 +264,38 @@
           Logout
         </button>
       </div>
-    </aside>
+  </aside>
+
+  <!-- Chat app layout -->
+  <div class="chat-app">
 
     <!-- Main chat area -->
     <main class="chat-main" role="main">
 
+      <!-- Drag & drop overlay (shown when files are dragged onto the chat) -->
+      <div class="drop-overlay" id="dropOverlay" aria-hidden="true">
+        <div class="drop-overlay-inner">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <div class="drop-overlay-title">Drop files to attach</div>
+          <div class="drop-overlay-sub">Images, PDFs, documents — up to 10 MB each</div>
+        </div>
+      </div>
+
       <!-- Chat header -->
       <header class="chat-header">
+        <!-- Mobile menu button (visible only on mobile) -->
+        <button class="chat-menu-btn" id="chatMenuBtn" aria-label="Open navigation menu" aria-expanded="false">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+
         <div class="chat-header-bot">
           <!-- Mini robot avatar 20px in circular container -->
           <div class="chat-bot-avatar">
@@ -253,6 +326,46 @@
             </div>
           </div>
         </div>
+
+        <!-- Persona selector -->
+        <div class="persona-select-wrap" title="Change bot persona">
+          <select class="persona-select" id="personaSelect" aria-label="Bot persona">
+            <option value="default">🤖 Default</option>
+            <option value="formal">🎩 Formal</option>
+            <option value="casual">😎 Casual</option>
+            <option value="teacher">🎓 Teacher</option>
+            <option value="dev">💻 Senior Dev</option>
+            <option value="poet">🎭 Poet</option>
+            <option value="scientist">🔬 Scientist</option>
+          </select>
+        </div>
+
+        <!-- Export session dropdown -->
+        <div class="header-action-wrap">
+          <button class="header-action-btn" id="exportBtn" aria-label="Export conversation" title="Export conversation">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </button>
+          <div class="header-menu" id="exportMenu" hidden>
+            <button class="header-menu-item" data-format="pdf">📄 Export as PDF</button>
+            <button class="header-menu-item" data-format="md">📝 Export as Markdown</button>
+            <button class="header-menu-item" data-format="json">🗂️ Export as JSON</button>
+          </div>
+        </div>
+
+        <!-- Theme toggle -->
+        <button class="header-action-btn theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme" title="Toggle theme">
+          <svg class="theme-icon-dark" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg class="theme-icon-light" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="display:none">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+          </svg>
+        </button>
 
         <div class="chat-header-user">
           <span class="header-user-name" id="headerUserName">Commander</span>
@@ -356,7 +469,14 @@
           Recording… <span id="recTime">0:00</span> &nbsp;(click mic to stop)
         </div>
 
+        <!-- Attachment chips container (supports multiple) -->
+        <div class="attachment-chips" id="attachmentChips" aria-live="polite"></div>
+
         <div class="chat-input-wrap" id="inputWrap">
+          <!-- Hidden file input (multiple) -->
+          <input type="file" id="fileInput" hidden multiple
+                 accept="image/*,.pdf,.doc,.docx,.txt,.md,.csv,.xlsx,.json" />
+
           <textarea
             class="chat-textarea"
             id="chatInput"
@@ -368,6 +488,11 @@
             spellcheck="true"
           ></textarea>
           <div class="input-actions">
+            <button class="attach-btn" id="attachBtn" aria-label="Attach a file or image" title="Attach a file or image">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+              </svg>
+            </button>
             <button class="mic-btn" id="micBtn" aria-label="Record audio message" title="Record audio message">
               🎤
             </button>
@@ -377,10 +502,15 @@
                 <polygon points="22 2 15 22 11 13 2 9 22 2"/>
               </svg>
             </button>
+            <button class="stop-btn" id="stopBtn" aria-label="Stop generation" title="Stop" hidden>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="6" y="6" width="12" height="12" rx="2"/>
+              </svg>
+            </button>
           </div>
         </div>
         <p class="input-hint">
-          Press <kbd>Enter</kbd> to send &nbsp;·&nbsp; <kbd>Shift+Enter</kbd> for new line &nbsp;·&nbsp; 🎤 Click mic to record
+          Press <kbd>Enter</kbd> to send &nbsp;·&nbsp; <kbd>Shift+Enter</kbd> for new line &nbsp;·&nbsp; 📎 attach · 🎤 record
         </p>
       </div>
     </main>
@@ -402,7 +532,7 @@
     document.getElementById('welcomeName').textContent = user.name + '!';
 
     // ── Session ID ──────────────────────────────────────────────────
-    const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    let currentSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
     // ── API helper ──────────────────────────────────────────────────
     async function apiPost(endpoint, data) {
@@ -418,6 +548,116 @@
     // ── Escape HTML ─────────────────────────────────────────────────
     function escapeHtml(str) {
       return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // ── Lightweight safe markdown renderer for bot messages ─────────
+    // Escapes HTML first, then applies: headings, bold, italic, inline
+    // code, fenced code blocks, links, unordered/ordered lists, blockquotes,
+    // horizontal rules, and paragraph breaks.
+    function renderMarkdown(src) {
+      if (!src) return '';
+      // Extract fenced code blocks first so their content isn't mangled
+      const codeBlocks = [];
+      let text = src.replace(/```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g, (m, lang, code) => {
+        codeBlocks.push({ lang: lang || '', code: code });
+        return '\u0000CODEBLOCK' + (codeBlocks.length - 1) + '\u0000';
+      });
+
+      // Escape HTML on the remaining text
+      text = escapeHtml(text);
+
+      // Headings (###, ##, #) at start of line
+      text = text.replace(/^###\s+(.+)$/gm, '<h4 class="md-h">$1</h4>');
+      text = text.replace(/^##\s+(.+)$/gm,  '<h3 class="md-h">$1</h3>');
+      text = text.replace(/^#\s+(.+)$/gm,   '<h2 class="md-h">$1</h2>');
+
+      // Horizontal rule
+      text = text.replace(/^\s*---\s*$/gm, '<hr class="md-hr"/>');
+
+      // Blockquotes
+      text = text.replace(/^&gt;\s?(.+)$/gm, '<blockquote class="md-bq">$1</blockquote>');
+
+      // Inline code (before bold/italic so backticks don't conflict)
+      text = text.replace(/`([^`\n]+)`/g, '<code class="md-ic">$1</code>');
+
+      // Bold **text** and __text__
+      text = text.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+
+      // Italic *text* and _text_ (avoid matching inside words)
+      text = text.replace(/(^|[^*\w])\*([^*\n]+?)\*(?!\*)/g, '$1<em>$2</em>');
+      text = text.replace(/(^|[^_\w])_([^_\n]+?)_(?!_)/g, '$1<em>$2</em>');
+
+      // Links [text](url) — only http(s) for safety
+      text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+
+      // Autolinks for bare http(s) URLs
+      text = text.replace(/(^|\s)(https?:\/\/[^\s<]+)/g, '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>');
+
+      // Lists: detect consecutive "- " or "* " or "1. " lines and wrap
+      const lines = text.split('\n');
+      const out = [];
+      let inUl = false, inOl = false;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const ulMatch = line.match(/^\s*[-*]\s+(.*)$/);
+        const olMatch = line.match(/^\s*\d+\.\s+(.*)$/);
+        if (ulMatch) {
+          if (inOl) { out.push('</ol>'); inOl = false; }
+          if (!inUl) { out.push('<ul class="md-list">'); inUl = true; }
+          out.push('<li>' + ulMatch[1] + '</li>');
+        } else if (olMatch) {
+          if (inUl) { out.push('</ul>'); inUl = false; }
+          if (!inOl) { out.push('<ol class="md-list">'); inOl = true; }
+          out.push('<li>' + olMatch[1] + '</li>');
+        } else {
+          if (inUl) { out.push('</ul>'); inUl = false; }
+          if (inOl) { out.push('</ol>'); inOl = false; }
+          out.push(line);
+        }
+      }
+      if (inUl) out.push('</ul>');
+      if (inOl) out.push('</ol>');
+      text = out.join('\n');
+
+      // Paragraphs: split on blank lines, but keep block elements intact
+      const blocks = text.split(/\n{2,}/);
+      text = blocks.map(b => {
+        const trimmed = b.trim();
+        if (!trimmed) return '';
+        if (/^<(h\d|ul|ol|li|blockquote|pre|hr|code)/i.test(trimmed)) return trimmed;
+        // Convert single newlines inside a paragraph to <br>
+        return '<p class="md-p">' + trimmed.replace(/\n/g, '<br>') + '</p>';
+      }).join('');
+
+      // Restore code blocks
+      text = text.replace(/\u0000CODEBLOCK(\d+)\u0000/g, (m, idx) => {
+        const cb = codeBlocks[Number(idx)];
+        const lang = cb.lang ? ' data-lang="' + escapeHtml(cb.lang) + '"' : '';
+        return '<pre class="md-pre"' + lang + '><code>' + escapeHtml(cb.code) + '</code></pre>';
+      });
+
+      return text;
+    }
+
+    // ── Strip JSON wrapper from bot responses ────────────────────────
+    function stripJsonWrapper(text) {
+      if (!text) return text;
+      var s = text.replace(/```json/g, '').replace(/```/g, '').trim();
+      try {
+        var p = JSON.parse(s);
+        if (p && typeof p.response === 'string') return p.response;
+      } catch(e) {}
+      // Fallback: extract response value with indexOf
+      var key = '"response":"';
+      var ki = s.indexOf(key);
+      if (ki === -1) { key = '"response": "'; ki = s.indexOf(key); }
+      if (ki >= 0) {
+        var vi = ki + key.length;
+        var ei = s.indexOf('"', vi);
+        if (ei > vi) return s.slice(vi, ei);
+      }
+      return text;
     }
 
     // ── Format time ─────────────────────────────────────────────────
@@ -453,8 +693,281 @@
       <circle cx="100" cy="8" r="5" fill="#00d4ff"/>
     </svg>`;
 
+    // ── Theme toggle ────────────────────────────────────────────────
+    (function () {
+      const saved = localStorage.getItem('astrobot_theme') || 'dark';
+      document.body.setAttribute('data-theme', saved);
+      const dark = document.querySelector('.theme-icon-dark');
+      const light = document.querySelector('.theme-icon-light');
+      const hljsTheme = document.getElementById('hljsTheme');
+      function apply(theme) {
+        document.body.setAttribute('data-theme', theme);
+        if (dark) dark.style.display = theme === 'dark' ? '' : 'none';
+        if (light) light.style.display = theme === 'dark' ? 'none' : '';
+        if (hljsTheme) {
+          hljsTheme.href = theme === 'dark'
+            ? 'https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css'
+            : 'https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-light.min.css';
+        }
+        if (window.mermaid) {
+          try { window.mermaid.initialize({ startOnLoad: false, theme: theme === 'dark' ? 'dark' : 'default', securityLevel: 'strict' }); } catch (_) {}
+        }
+      }
+      apply(saved);
+      document.getElementById('themeToggle').addEventListener('click', () => {
+        const next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('astrobot_theme', next);
+        apply(next);
+      });
+    })();
+
+    // ── Persona ─────────────────────────────────────────────────────
+    let currentPersona = localStorage.getItem('astrobot_persona') || 'default';
+    const personaSelect = document.getElementById('personaSelect');
+    personaSelect.value = currentPersona;
+    personaSelect.addEventListener('change', () => {
+      currentPersona = personaSelect.value;
+      localStorage.setItem('astrobot_persona', currentPersona);
+      showToast('Persona: ' + personaSelect.options[personaSelect.selectedIndex].text, 'info');
+    });
+
+    // ── Attachment state (multiple) ─────────────────────────────────
+    let pendingAttachments = []; // array of { name, mime, size, data (base64) }
+    const fileInput = document.getElementById('fileInput');
+    const attachBtn = document.getElementById('attachBtn');
+    const chipsContainer = document.getElementById('attachmentChips');
+
+    const MAX_ATTACH_BYTES = 10 * 1024 * 1024; // 10 MB each
+    const MAX_ATTACHMENTS = 5;
+
+    function humanFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function renderChips() {
+      chipsContainer.innerHTML = '';
+      pendingAttachments.forEach((att, i) => {
+        const chip = document.createElement('div');
+        chip.className = 'attachment-chip';
+        chip.innerHTML =
+          '<div class="attachment-chip-icon" aria-hidden="true">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+          '<path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>' +
+          '</svg></div>' +
+          '<div class="attachment-chip-info">' +
+          '<div class="attachment-chip-name">' + escapeHtml(att.name) + '</div>' +
+          '<div class="attachment-chip-size">' + humanFileSize(att.size) + '</div>' +
+          '</div>' +
+          '<button type="button" class="attachment-chip-remove" aria-label="Remove attachment">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">' +
+          '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' +
+          '</svg></button>';
+        chip.querySelector('.attachment-chip-remove').addEventListener('click', () => {
+          pendingAttachments.splice(i, 1);
+          renderChips();
+          updateSendState();
+        });
+        chipsContainer.appendChild(chip);
+      });
+    }
+
+    function addFile(file) {
+      if (!file) return;
+      if (pendingAttachments.length >= MAX_ATTACHMENTS) {
+        showToast('Max ' + MAX_ATTACHMENTS + ' files at once.', 'error');
+        return;
+      }
+      if (file.size > MAX_ATTACH_BYTES) {
+        showToast('"' + file.name + '" exceeds 10 MB.', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result || '';
+        const base64 = String(dataUrl).split(',')[1] || '';
+        pendingAttachments.push({
+          name: file.name,
+          mime: file.type || 'application/octet-stream',
+          size: file.size,
+          data: base64,
+        });
+        renderChips();
+        updateSendState();
+      };
+      reader.onerror = () => showToast('Could not read "' + file.name + '".', 'error');
+      reader.readAsDataURL(file);
+    }
+
+    function clearAttachments() {
+      pendingAttachments = [];
+      fileInput.value = '';
+      renderChips();
+      updateSendState();
+    }
+
+    attachBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      const files = Array.from(e.target.files || []);
+      files.forEach(addFile);
+      fileInput.value = ''; // reset so the same file can be reselected
+    });
+
+    // ── Drag & drop ─────────────────────────────────────────────────
+    (function () {
+      const dropOverlay = document.getElementById('dropOverlay');
+      const chatMain = document.querySelector('.chat-main');
+      let dragDepth = 0;
+
+      function isFileDrag(e) {
+        return e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files');
+      }
+
+      window.addEventListener('dragenter', (e) => {
+        if (!isFileDrag(e)) return;
+        e.preventDefault();
+        dragDepth++;
+        dropOverlay.classList.add('show');
+      });
+      window.addEventListener('dragover', (e) => {
+        if (!isFileDrag(e)) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+      });
+      window.addEventListener('dragleave', (e) => {
+        if (!isFileDrag(e)) return;
+        dragDepth = Math.max(0, dragDepth - 1);
+        if (dragDepth === 0) dropOverlay.classList.remove('show');
+      });
+      window.addEventListener('drop', (e) => {
+        if (!isFileDrag(e)) return;
+        e.preventDefault();
+        dragDepth = 0;
+        dropOverlay.classList.remove('show');
+        const files = Array.from(e.dataTransfer.files || []);
+        files.forEach(addFile);
+      });
+    })();
+
+    // ── Download helper ─────────────────────────────────────────────
+    function downloadDataUrl(dataUrl, filename) {
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = filename || 'download';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => a.remove(), 100);
+    }
+
+    // ── Enhance bot bubble: KaTeX math + highlight.js + mermaid ─────
+    function enhanceBotBubble(bubble) {
+      if (!bubble) return;
+
+      // 1. Mermaid blocks: <pre><code class="language-mermaid">...</code></pre>
+      if (window.mermaid) {
+        bubble.querySelectorAll('pre code.language-mermaid, code.language-mermaid').forEach((codeEl) => {
+          const pre = codeEl.closest('pre') || codeEl;
+          const source = codeEl.textContent || '';
+          if (!source.trim()) return;
+          const container = document.createElement('div');
+          container.className = 'mermaid-container';
+          container.textContent = source;
+          pre.replaceWith(container);
+        });
+        const mermaidBlocks = bubble.querySelectorAll('.mermaid-container');
+        if (mermaidBlocks.length) {
+          mermaidBlocks.forEach(async (el, i) => {
+            try {
+              const { svg } = await window.mermaid.render('mmd-' + Date.now() + '-' + i, el.textContent);
+              el.innerHTML = svg;
+            } catch (err) {
+              el.innerHTML = '<div style="color:#fca5a5;font-size:0.82rem;">Mermaid diagram failed to render.</div>';
+            }
+          });
+        }
+      }
+
+      // 2. Code highlighting
+      if (window.hljs) {
+        bubble.querySelectorAll('pre code').forEach((el) => {
+          if (el.classList.contains('language-mermaid')) return;
+          try { window.hljs.highlightElement(el); } catch (_) {}
+        });
+      }
+
+      // 3. KaTeX math ($...$ and $$...$$)
+      if (window.renderMathInElement) {
+        try {
+          window.renderMathInElement(bubble, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '\\[', right: '\\]', display: true },
+              { left: '$', right: '$', display: false },
+              { left: '\\(', right: '\\)', display: false },
+            ],
+            throwOnError: false,
+          });
+        } catch (_) {}
+      }
+    }
+
+    // ── Language detection (very simple heuristic) ─────────────────
+    function detectLang(text) {
+      if (!text) return null;
+      const t = text.toLowerCase();
+      if (/[а-я]/.test(t)) return 'ru';
+      if (/[一-龯]/.test(t)) return 'zh';
+      if (/[가-힣]/.test(t)) return 'ko';
+      if (/[ぁ-ゔァ-ヴー々〆〤]/.test(t)) return 'ja';
+      if (/[α-ωΑ-Ω]/.test(t)) return 'el';
+      if (/[ا-ي]/.test(t)) return 'ar';
+      if (/\b(le|la|les|un|une|des|et|est|sont|je|tu|nous|vous|pour|avec|sans|mais|ou|donc)\b/.test(t)) return 'fr';
+      if (/\b(el|la|los|las|un|una|unos|unas|y|es|son|yo|tu|nosotros|para|con|pero|porque)\b/.test(t)) return 'es';
+      if (/\b(der|die|das|und|ist|sind|ich|du|wir|für|mit|ohne|aber|oder|weil)\b/.test(t)) return 'de';
+      if (/\b(the|and|is|are|i|you|we|they|for|with|without|but|or|because)\b/.test(t)) return 'en';
+      return null;
+    }
+
+    // ── Text-to-Speech helper ───────────────────────────────────────
+    const ttsState = { utterance: null, btn: null };
+    function speak(text, btn) {
+      if (!window.speechSynthesis) {
+        showToast('Text-to-speech is not supported in this browser.', 'error');
+        return;
+      }
+      // If same button clicked while speaking, stop
+      if (ttsState.utterance && ttsState.btn === btn) {
+        window.speechSynthesis.cancel();
+        ttsState.utterance = null;
+        if (ttsState.btn) ttsState.btn.classList.remove('active');
+        ttsState.btn = null;
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text.replace(/[*_`#>]/g, ''));
+      const lang = detectLang(text);
+      u.lang = lang === 'fr' ? 'fr-FR' : lang === 'es' ? 'es-ES' : lang === 'de' ? 'de-DE' : 'en-US';
+      u.rate = 1.0;
+      u.pitch = 1.0;
+      u.onend = () => {
+        if (ttsState.btn) ttsState.btn.classList.remove('active');
+        ttsState.utterance = null;
+        ttsState.btn = null;
+      };
+      u.onerror = u.onend;
+      ttsState.utterance = u;
+      ttsState.btn = btn;
+      if (btn) btn.classList.add('active');
+      window.speechSynthesis.speak(u);
+    }
+
+    // Last user send (for Regenerate)
+    let lastUserSend = null; // { text, attachments }
+
     // ── Add message to UI ───────────────────────────────────────────
-    function addMessage(type, text, audioBlob, imageUrl) {
+    function addMessage(type, text, audioBlob, imageUrl, attachmentMeta, pdfMeta, options) {
+      options = options || {};
       showChat();
       const div = document.createElement('div');
       div.className = 'message ' + type + '-msg';
@@ -483,12 +996,51 @@
           + '</div>';
       }
 
+      // User-sent attachment preview
+      let attachmentHTML = '';
+      if (attachmentMeta && type === 'user') {
+        const isImage = (attachmentMeta.mime || '').startsWith('image/');
+        if (isImage && attachmentMeta.dataUrl) {
+          attachmentHTML = '<div class="msg-attachment">'
+            + '<img src="' + attachmentMeta.dataUrl + '" alt="' + escapeHtml(attachmentMeta.name) + '" />'
+            + '<div class="msg-attachment-meta">📷 ' + escapeHtml(attachmentMeta.name) + ' · ' + humanFileSize(attachmentMeta.size) + '</div>'
+            + '</div>';
+        } else {
+          attachmentHTML = '<div class="msg-file-chip">'
+            + '<div class="msg-file-chip-icon">📎</div>'
+            + '<div class="msg-file-chip-info">'
+            + '<div class="msg-file-chip-name">' + escapeHtml(attachmentMeta.name) + '</div>'
+            + '<div class="msg-file-chip-size">' + humanFileSize(attachmentMeta.size) + '</div>'
+            + '</div></div>';
+        }
+      }
+
       const contentDiv = document.createElement('div');
       contentDiv.className = 'msg-content';
 
       const bubble = document.createElement('div');
       bubble.className = 'msg-bubble';
-      bubble.innerHTML = escapeHtml(text) + audioHTML + imageHTML;
+      const bodyHtml = (type === 'bot') ? renderMarkdown(text) : escapeHtml(text);
+      bubble.innerHTML = attachmentHTML + bodyHtml + audioHTML + imageHTML;
+
+      // PDF download card for bot messages
+      if (type === 'bot' && pdfMeta && pdfMeta.url) {
+        const pdfCard = document.createElement('div');
+        pdfCard.className = 'msg-pdf-card';
+        pdfCard.innerHTML =
+          '<div class="msg-pdf-icon">' +
+          '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+          '</div>' +
+          '<div class="msg-pdf-info">' +
+          '<div class="msg-pdf-name">' + escapeHtml(pdfMeta.filename || 'report.pdf') + '</div>' +
+          '<div class="msg-pdf-hint">Generated PDF · click to download</div>' +
+          '</div>' +
+          '<button class="msg-pdf-download" aria-label="Download PDF">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+          '</button>';
+        pdfCard.addEventListener('click', () => downloadDataUrl(pdfMeta.url, pdfMeta.filename || 'report.pdf'));
+        bubble.appendChild(pdfCard);
+      }
 
       const meta = document.createElement('div');
       meta.className = 'msg-meta';
@@ -498,8 +1050,9 @@
       timeEl.textContent = fmtTime(new Date());
       meta.appendChild(timeEl);
 
-      // Copy button for bot messages
+      // Action buttons
       if (type === 'bot') {
+        // Copy
         const copyBtn = document.createElement('button');
         copyBtn.className = 'copy-btn';
         copyBtn.setAttribute('aria-label', 'Copy message');
@@ -512,6 +1065,76 @@
           } catch(e) { showToast('Could not copy.', 'error'); }
         });
         meta.appendChild(copyBtn);
+
+        // TTS (speak)
+        if (window.speechSynthesis) {
+          const ttsBtn = document.createElement('button');
+          ttsBtn.className = 'msg-action-btn tts-btn';
+          ttsBtn.setAttribute('aria-label', 'Read aloud');
+          ttsBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Speak';
+          ttsBtn.addEventListener('click', () => speak(text, ttsBtn));
+          meta.appendChild(ttsBtn);
+        }
+
+        // Regenerate
+        const regenBtn = document.createElement('button');
+        regenBtn.className = 'msg-action-btn';
+        regenBtn.setAttribute('aria-label', 'Regenerate response');
+        regenBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Regenerate';
+        regenBtn.addEventListener('click', () => {
+          if (!lastUserSend) { showToast('Nothing to regenerate.', 'error'); return; }
+          // Remove this bot bubble from the DOM
+          div.remove();
+          // Re-send the same user text + attachments (don't re-add the user bubble)
+          sendMessage(lastUserSend.text, lastUserSend.attachments, { skipUserBubble: true });
+        });
+        meta.appendChild(regenBtn);
+      }
+
+      // Edit button for user messages
+      if (type === 'user') {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'msg-action-btn';
+        editBtn.setAttribute('aria-label', 'Edit and resend');
+        editBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit';
+        editBtn.addEventListener('click', () => {
+          // Find the text node of the bubble
+          const textSpan = bubble;
+          const original = text;
+          textSpan.setAttribute('contenteditable', 'true');
+          textSpan.focus();
+          // Place caret at end
+          const range = document.createRange();
+          range.selectNodeContents(textSpan);
+          range.collapse(false);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+
+          function commit() {
+            const newText = textSpan.innerText.trim();
+            textSpan.removeAttribute('contenteditable');
+            textSpan.removeEventListener('blur', commit);
+            textSpan.removeEventListener('keydown', keyHandler);
+            if (!newText || newText === original) { textSpan.innerText = original; return; }
+            // Remove this user bubble + everything after it, then resend
+            const parent = div.parentNode;
+            let cur = div;
+            while (cur) {
+              const next = cur.nextSibling;
+              parent.removeChild(cur);
+              cur = next;
+            }
+            sendMessage(newText, null);
+          }
+          function keyHandler(e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commit(); }
+            else if (e.key === 'Escape') { textSpan.innerText = original; textSpan.removeAttribute('contenteditable'); }
+          }
+          textSpan.addEventListener('blur', commit);
+          textSpan.addEventListener('keydown', keyHandler);
+        });
+        meta.appendChild(editBtn);
       }
 
       contentDiv.appendChild(bubble);
@@ -522,6 +1145,36 @@
 
       messagesArea.appendChild(div);
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+      // Post-render: enhance bot bubbles with KaTeX / hljs / mermaid
+      if (type === 'bot') {
+        // Fake streaming: reveal text progressively for nicer UX
+        if (!options.skipStreaming && text && text.length > 40) {
+          const originalHtml = bubble.innerHTML;
+          bubble.classList.add('streaming');
+          // Temporarily clear then reveal char groups
+          const words = text.split(/(\s+)/);
+          let i = 0;
+          bubble.innerHTML = '';
+          const interval = setInterval(() => {
+            i += Math.max(1, Math.floor(words.length / 35));
+            if (i >= words.length) {
+              clearInterval(interval);
+              bubble.innerHTML = originalHtml;
+              bubble.classList.remove('streaming');
+              enhanceBotBubble(bubble);
+              // re-append any non-bubble children like pdf card
+              messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            } else {
+              bubble.textContent = words.slice(0, i).join('');
+              messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+          }, 30);
+        } else {
+          enhanceBotBubble(bubble);
+        }
+      }
+
       return div;
     }
 
@@ -559,73 +1212,82 @@
     }
 
     // ── Load & render history sidebar ───────────────────────────────
-    let cachedConversations = [];
+    let cachedSessions = [];
 
     async function loadHistory() {
       try {
-        const res = await fetch('/api/chat/history', { headers: { 'Authorization': 'Bearer ' + token } });
+        const res = await fetch('/api/chat/sessions', { headers: { 'Authorization': 'Bearer ' + token } });
         const data = await res.json();
-        cachedConversations = data.data || data.conversations || [];
+        cachedSessions = data.data || [];
         renderHistorySidebar();
       } catch(e) {}
     }
 
     function renderHistorySidebar() {
       const list = document.getElementById('historyList');
-      if (cachedConversations.length === 0) {
-        list.innerHTML = '<div class="history-empty"><div style="font-size:1.4rem;margin-bottom:8px;opacity:0.4;">🌌</div>No missions yet.<br/>Start chatting!</div>';
+      if (cachedSessions.length === 0) {
+        list.innerHTML = '<div class="history-empty"><div style="font-size:1.4rem;margin-bottom:8px;opacity:0.4;">&#x1F30C;</div>No missions yet.<br/>Start chatting!</div>';
         return;
       }
       list.innerHTML = '';
       const today = new Date().toDateString();
-      cachedConversations.slice().reverse().forEach(c => {
+      cachedSessions.forEach(s => {
         const d = document.createElement('div');
         d.className = 'history-item';
-        d.dataset.id = c.id;
-        const t = new Date(c.created_at || c.createdAt);
-        const dateStr = t.toDateString() === today ? 'Today' : t.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' });
-        const msgText = (c.message || '').substring(0, 28) + ((c.message || '').length > 28 ? '…' : '');
-        d.innerHTML =
-          '<span class="history-item-icon">💬</span>' +
-          '<span class="history-item-text">' + escapeHtml(msgText) + '</span>' +
-          '<span class="history-item-time">' + dateStr + '</span>' +
-          '<button class="history-delete-btn" data-id="' + c.id + '" aria-label="Delete conversation" title="Delete">✕</button>';
-
-        // Click on the item → load all conversations in chat
-        d.addEventListener('click', (e) => {
-          if (e.target.classList.contains('history-delete-btn')) return;
-          openFullHistory();
-        });
-
-        // Delete button
-        d.querySelector('.history-delete-btn').addEventListener('click', async (e) => {
+        d.dataset.sessionId = s.session_id;
+        const t = new Date(s.createdAt);
+        const dateStr = t.toDateString() === today ? 'Today' : t.toLocaleDateString('fr-FR', {day:'2-digit',month:'short'});
+        const raw = (s.first_message || '');
+        const msgText = raw.length > 28 ? raw.substring(0,28) + '…' : raw;
+        d.innerHTML = '<span class="history-item-icon">&#x1F4AC;</span>'
+          + '<span class="history-item-text">' + escapeHtml(msgText) + '</span>'
+          + '<span class="history-item-time">' + escapeHtml(dateStr) + '</span>'
+          + '<button class="history-delete-btn" aria-label="Delete" title="Delete">&#x2715;</button>';
+        d.querySelector('.history-delete-btn').addEventListener('click', (e) => {
           e.stopPropagation();
-          const id = e.target.dataset.id;
-          try {
-            await fetch('/api/chat/' + id, {
-              method: 'DELETE',
-              headers: { 'Authorization': 'Bearer ' + token }
-            });
-            cachedConversations = cachedConversations.filter(x => String(x.id) !== String(id));
-            renderHistorySidebar();
-            showToast('Conversation deleted.', 'info');
-          } catch(err) {
-            showToast('Could not delete.', 'error');
-          }
+          deleteSession(s.session_id, d);
         });
-
+        d.addEventListener('click', () => {
+          document.querySelectorAll('.history-item.active').forEach(el=>el.classList.remove('active'));
+          d.classList.add('active');
+          openSession(s.session_id);
+        });
         list.appendChild(d);
       });
     }
 
-    // Load all conversations into the chat view
-    function openFullHistory() {
+    async function deleteSession(sessionId, itemEl) {
+      try {
+        const res = await fetch('/api/chat/sessions/' + encodeURIComponent(sessionId), {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (data.success) {
+          const wasActive = itemEl.classList.contains('active');
+          cachedSessions = cachedSessions.filter(s => s.session_id !== sessionId);
+          itemEl.remove();
+          if (cachedSessions.length === 0) {
+            document.getElementById('historyList').innerHTML = '<div class="history-empty"><div style="font-size:1.4rem;margin-bottom:8px;opacity:0.4;">&#x1F30C;</div>No missions yet.<br/>Start chatting!</div>';
+          }
+          if (wasActive) {
+            messagesArea.innerHTML = '';
+            welcomeScreen.style.display = 'flex';
+            messagesArea.style.display = 'none';
+            hasMessages = false;
+          }
+          showToast('Conversation deleted.', 'success');
+        } else { showToast('Could not delete.', 'error'); }
+      } catch(e) { showToast('Could not delete.', 'error'); }
+    }
+
+    // ── Render a list of conversation records into the messages area ─
+    function renderConversations(conversations) {
       messagesArea.innerHTML = '';
       welcomeScreen.style.display = 'none';
       messagesArea.style.display = 'flex';
       hasMessages = true;
-      const ordered = cachedConversations.slice(); // already oldest→newest
-      ordered.forEach(c => {
+      conversations.forEach(c => {
         // User bubble
         const uDiv = document.createElement('div');
         uDiv.className = 'message user-msg';
@@ -662,7 +1324,8 @@
           bContent.className = 'msg-content';
           const bBubble = document.createElement('div');
           bBubble.className = 'msg-bubble';
-          bBubble.textContent = c.response;
+          bBubble.innerHTML = renderMarkdown(stripJsonWrapper(c.response));
+          setTimeout(() => enhanceBotBubble(bBubble), 0);
           const bMeta = document.createElement('div');
           bMeta.className = 'msg-meta';
           const bTime = document.createElement('span');
@@ -679,27 +1342,130 @@
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
+    // Open a specific session by session_id
+    async function openSession(sessionId) {
+      try {
+        const res = await fetch('/api/chat/session/' + sessionId, { headers: { 'Authorization': 'Bearer ' + token } });
+        const data = await res.json();
+        const conversations = data.data || [];
+        renderConversations(conversations);
+      } catch(e) {
+        showToast('Could not load session.', 'error');
+      }
+    }
+
+    // Load all conversations into the chat view (kept for potential future use)
+    function openFullHistory() {
+      // Fetch full history from API and render
+      fetch('/api/chat/history', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(r => r.json())
+        .then(data => {
+          const conversations = (data.data || data.conversations || []).slice();
+          renderConversations(conversations);
+        })
+        .catch(() => showToast('Could not load history.', 'error'));
+    }
+
     // ── Send text message ───────────────────────────────────────────
     const textarea = document.getElementById('chatInput');
     const sendBtn  = document.getElementById('sendBtn');
 
-    async function sendMessage(text) {
-      if (!text || !text.trim()) return;
+    // Active request state (for Stop button)
+    let activeController = null;
+    const stopBtn = document.getElementById('stopBtn');
+
+    function setPendingUI(pending) {
+      sendBtn.hidden = !!pending;
+      stopBtn.hidden = !pending;
+    }
+
+    stopBtn.addEventListener('click', () => {
+      if (activeController) {
+        activeController.abort();
+        activeController = null;
+      }
+      setPendingUI(false);
+    });
+
+    async function sendMessage(text, attachmentsArg, opts) {
+      opts = opts || {};
+      const attachments = Array.isArray(attachmentsArg) ? attachmentsArg
+        : (attachmentsArg ? [attachmentsArg] : pendingAttachments.slice());
+      const hasText = text && text.trim().length > 0;
+      if (!hasText && attachments.length === 0) return;
+
+      // Build user message bubble
+      if (!opts.skipUserBubble) {
+        const firstAttMeta = attachments[0] ? {
+          name: attachments[0].name,
+          mime: attachments[0].mime,
+          size: attachments[0].size,
+          dataUrl: 'data:' + attachments[0].mime + ';base64,' + attachments[0].data,
+        } : null;
+        const userText = hasText ? text : (attachments.length > 0 ? '[Attachment sent]' : '');
+        addMessage('user', userText, null, null, firstAttMeta);
+        // For extra attachments (beyond the first) show more chips
+        for (let i = 1; i < attachments.length; i++) {
+          const a = attachments[i];
+          const meta = {
+            name: a.name, mime: a.mime, size: a.size,
+            dataUrl: 'data:' + a.mime + ';base64,' + a.data,
+          };
+          addMessage('user', '', null, null, meta);
+        }
+      }
+
+      // Track for Regenerate
+      lastUserSend = { text: hasText ? text : '', attachments: attachments.slice() };
+
       textarea.value = '';
       textarea.style.height = 'auto';
-      sendBtn.disabled = true;
-      addMessage('user', text);
+      clearAttachments();
+
       showTyping();
+      setPendingUI(true);
+      activeController = new AbortController();
+
       try {
-        const data = await apiPost('/api/chat/message', { message: text, session_id: sessionId });
+        const payload = {
+          message: hasText ? text : '',
+          session_id: currentSessionId,
+          persona: currentPersona,
+        };
+        if (attachments.length === 1) payload.attachment = attachments[0];
+        else if (attachments.length > 1) payload.attachments = attachments;
+
+        const res = await fetch('/api/chat/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify(payload),
+          signal: activeController.signal,
+        });
+        if (res.status === 401) { localStorage.clear(); window.location.href = '/login.html'; return; }
+        const data = await res.json();
+
         hideTyping();
-        const response = (data.response || (data.data && data.data.response)) || "I'm currently offline from my main systems. Please check back shortly, Commander.";
+        setPendingUI(false);
+        activeController = null;
+
+        const rawResponse = (data.response || (data.data && data.data.response)) || "I'm currently offline from my main systems. Please check back shortly, Commander.";
+        const response = stripJsonWrapper(rawResponse);
         const imageUrl = data.data && data.data.image_url ? data.data.image_url : null;
-        addMessage('bot', response, null, imageUrl);
+        const pdfMeta = (data.data && data.data.pdf_url) ? {
+          url: data.data.pdf_url,
+          filename: data.data.pdf_filename || 'report.pdf',
+        } : null;
+        addMessage('bot', response, null, imageUrl, null, pdfMeta);
         loadHistory();
       } catch(e) {
         hideTyping();
-        addMessage('bot', 'Connection error. Please check your network, Commander.');
+        setPendingUI(false);
+        activeController = null;
+        if (e && e.name === 'AbortError') {
+          addMessage('bot', '⏹️ Generation stopped, Commander.', null, null, null, null, { skipStreaming: true });
+        } else {
+          addMessage('bot', 'Connection error. Please check your network, Commander.', null, null, null, null, { skipStreaming: true });
+        }
       }
     }
 
@@ -711,9 +1477,10 @@
         addMessage('user', '🎙️ Audio message sent', blob);
         showTyping();
         try {
-          const data = await apiPost('/api/chat/message', { audio: base64, session_id: sessionId, message: '[Audio message]' });
+          const data = await apiPost('/api/chat/message', { audio: base64, session_id: currentSessionId, message: '[Audio message]' });
           hideTyping();
-          const response = (data.response || (data.data && data.data.response)) || 'Audio received. Processing your request, Commander.';
+          const rawResponse = (data.response || (data.data && data.data.response)) || 'Audio received. Processing your request, Commander.';
+          const response = stripJsonWrapper(rawResponse);
           addMessage('bot', response);
           loadHistory();
         } catch(e) {
@@ -725,10 +1492,14 @@
     }
 
     // ── Input handlers ──────────────────────────────────────────────
+    function updateSendState() {
+      const hasText = textarea.value.trim().length > 0;
+      sendBtn.disabled = !hasText && pendingAttachments.length === 0;
+    }
     textarea.addEventListener('input', () => {
       textarea.style.height = 'auto';
       textarea.style.height = Math.min(textarea.scrollHeight, 140) + 'px';
-      sendBtn.disabled = textarea.value.trim().length === 0;
+      updateSendState();
     });
     textarea.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -745,10 +1516,12 @@
 
     // ── New chat ────────────────────────────────────────────────────
     document.getElementById('newChatBtn').addEventListener('click', () => {
+      currentSessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       messagesArea.innerHTML = '';
       welcomeScreen.style.display = 'flex';
       messagesArea.style.display = 'none';
       hasMessages = false;
+      document.querySelectorAll('.history-item.active').forEach(el => el.classList.remove('active'));
     });
 
     // ── Audio recording ─────────────────────────────────────────────
@@ -990,9 +1763,130 @@
       });
     })();
 
+    // ── Mobile sidebar drawer ───────────────────────────────────────
+    (function () {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      const menuBtn = document.getElementById('chatMenuBtn');
+      const closeBtn = document.getElementById('sidebarCloseBtn');
+
+      function openDrawer() {
+        sidebar.classList.add('sidebar-open');
+        overlay.classList.add('show');
+        menuBtn.setAttribute('aria-expanded', 'true');
+        document.body.classList.add('drawer-open');
+      }
+      function closeDrawer() {
+        sidebar.classList.remove('sidebar-open');
+        overlay.classList.remove('show');
+        menuBtn.setAttribute('aria-expanded', 'false');
+        document.body.classList.remove('drawer-open');
+      }
+
+      menuBtn.addEventListener('click', openDrawer);
+      closeBtn.addEventListener('click', closeDrawer);
+      overlay.addEventListener('click', closeDrawer);
+
+      // Auto-close on actions inside the drawer
+      ['newChatBtn', 'settingsBtn', 'logoutBtn'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', () => {
+          if (window.matchMedia('(max-width: 768px)').matches) closeDrawer();
+        });
+      });
+      document.getElementById('historyList').addEventListener('click', (e) => {
+        if (e.target.closest('.history-item') && !e.target.closest('.history-delete-btn')) {
+          if (window.matchMedia('(max-width: 768px)').matches) closeDrawer();
+        }
+      });
+
+      // Close on Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('sidebar-open')) closeDrawer();
+      });
+    })();
+
+    // ── Sidebar history search ──────────────────────────────────────
+    (function () {
+      const input = document.getElementById('sidebarSearch');
+      const clearBtn = document.getElementById('sidebarSearchClear');
+      input.addEventListener('input', () => {
+        const q = input.value.trim().toLowerCase();
+        clearBtn.hidden = q.length === 0;
+        document.querySelectorAll('#historyList .history-item').forEach((el) => {
+          const txt = (el.querySelector('.history-item-text') || {}).textContent || '';
+          el.style.display = !q || txt.toLowerCase().includes(q) ? '' : 'none';
+        });
+      });
+      clearBtn.addEventListener('click', () => {
+        input.value = '';
+        clearBtn.hidden = true;
+        input.dispatchEvent(new Event('input'));
+        input.focus();
+      });
+    })();
+
+    // ── Export conversation menu ────────────────────────────────────
+    (function () {
+      const btn = document.getElementById('exportBtn');
+      const menu = document.getElementById('exportMenu');
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.hidden = !menu.hidden;
+      });
+      document.addEventListener('click', () => { menu.hidden = true; });
+      menu.addEventListener('click', (e) => e.stopPropagation());
+
+      menu.querySelectorAll('[data-format]').forEach((item) => {
+        item.addEventListener('click', async () => {
+          menu.hidden = true;
+          const fmt = item.getAttribute('data-format');
+          try {
+            const res = await fetch('/api/chat/export/' + encodeURIComponent(currentSessionId) + '?format=' + fmt, {
+              headers: { 'Authorization': 'Bearer ' + token },
+            });
+            if (!res.ok) { showToast('Nothing to export yet.', 'error'); return; }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const ext = fmt === 'md' ? 'md' : fmt === 'json' ? 'json' : 'pdf';
+            a.href = url;
+            a.download = 'astrobot-conversation.' + ext;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 200);
+            showToast('Export ready: ' + ext.toUpperCase(), 'success');
+          } catch (err) {
+            showToast('Export failed.', 'error');
+          }
+        });
+      });
+    })();
+
     // ── Init ────────────────────────────────────────────────────────
     loadHistory();
     textarea.focus();
+
+    // ── Deliver any pending message from landing chatbar ────────────
+    (function () {
+      const pending = sessionStorage.getItem('astrobot_pending_message');
+      if (pending && pending.trim()) {
+        sessionStorage.removeItem('astrobot_pending_message');
+        setTimeout(() => sendMessage(pending), 250);
+      }
+    })();
+  </script>
+
+  <!-- External rendering libraries -->
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/core.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"></script>
+  <script type="module">
+    // Mermaid via ESM so it's tree-shaken and loaded only here
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.esm.min.mjs';
+    window.mermaid = mermaid;
+    mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'strict' });
   </script>
 </body>
 </html>

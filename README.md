@@ -1,350 +1,249 @@
-# AstroBot — Your Intelligent Space Assistant
+# AstroBot — Intelligent Space Assistant
 
-AstroBot is an AI-powered chat assistant with a space-themed UI. Users can register, login, chat with an AI (via n8n webhooks), and optionally generate images using Hugging Face's Stable Diffusion. All conversations are stored in PostgreSQL.
-
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Project Structure](#project-structure)
-- [n8n Workflow](#n8n-workflow)
-- [Frontend](#frontend)
-- [Backend](#backend)
-- [How It Works](#how-it-works)
-- [Getting Started](#getting-started)
-- [Docker Deployment](#docker-deployment)
-- [API Reference](#api-reference)
-- [Environment Variables](#environment-variables)
-- [License](#license)
+AstroBot is a full-stack AI chat application with a space-themed UI inspired by the Astro Bot PlayStation game. It features JWT authentication, PostgreSQL persistence, and connects to an n8n AI workflow via webhook.
 
 ---
 
-## Overview
+## Latest Update (Branding + Workflow)
 
-AstroBot provides:
+### New Branding
 
-- **User authentication** — Register, login, profile management, password change
-- **AI chat** — Send text or voice messages; get AI responses via n8n webhook
-- **Conversation history** — View, load, and delete past chats
-- **Image generation** — Ask the AI to generate images; rendered via Hugging Face API
-- **Space-themed UI** — Starfield backgrounds, animated robot, responsive design
+![AstroBot Logo](logo.png)
+
+![AstroBot Character](astro_bot_2.png)
+
+### n8n Workflow Used by AstroBot
+
+![n8n Workflow](n8n.png)
+
+This workflow receives user text/audio from the backend webhook, transcribes audio when needed, sends the prompt to the AI Agent (Mistral + Think + SerpAPI), then returns the final answer back to AstroBot.
 
 ---
 
 ## Project Structure
 
-> 📘 **New:** See [**docs/N8N_WORKFLOW.md**](docs/N8N_WORKFLOW.md) for a step-by-step guide to the n8n AI workflow (Whisper, Mistral, SerpAPI).
-
 ```
 astrobot/
-├── frontend/           # Static HTML/CSS/JS
-│   ├── index.html      # Landing page
-│   ├── login.html      # Login form
-│   ├── register.html   # Registration form
-│   ├── chat.html       # Chat interface (main app)
-│   └── style.css       # Shared styles
-├── backend/            # Node.js Express API
-│   ├── server.js       # Entry point
-│   ├── db/             # PostgreSQL connection & init
-│   ├── routes/         # Auth & chat routes
-│   └── middleware/     # JWT auth middleware
-├── docker/             # Docker config
-│   ├── Dockerfile
-│   └── docker-compose.yml
-├── docs/              # Documentation
-│   └── N8N_WORKFLOW.md  # n8n workflow step-by-step guide
-├── requirements.txt    # Python deps (deploy script)
+├── frontend/
+│   ├── index.html       Landing page with login/register buttons
+│   ├── login.html       Login page
+│   ├── register.html    Registration page
+│   ├── chat.html        Main chat interface
+│   ├── style.css        Shared stylesheet (Orbitron + Exo 2 fonts, glassmorphism)
+│   └── script.js        Shared utilities (Auth, API wrapper, Toast, DOM helpers)
+├── backend/
+│   ├── server.js        Express server (CORS, Helmet, rate limiting, static serving)
+│   ├── routes/
+│   │   ├── auth.js      POST /api/auth/register, POST /api/auth/login
+│   │   └── chat.js      POST /api/chat/message, GET /api/chat/history
+│   ├── middleware/
+│   │   └── auth.js      JWT Bearer token verification
+│   ├── db/
+│   │   └── index.js     PostgreSQL pool + table initialization
+│   └── package.json
+├── docker/
+│   ├── Dockerfile       Multi-stage Node 18 Alpine build
+│   └── docker-compose.yml  Connects to external n8n network
 └── README.md
 ```
 
 ---
 
-## n8n Workflow
+## Tech Stack
 
-The AI chat is powered by an **n8n workflow** that:
-
-1. Receives text or voice messages via webhook
-2. Transcribes voice with **Whisper**
-3. Sends the prompt to an **AI Agent** (Mistral) with **SerpAPI** (web search) and **Think** (reasoning)
-4. Returns the response to the frontend
-
-📘 **Full step-by-step guide with examples:** [docs/N8N_WORKFLOW.md](docs/N8N_WORKFLOW.md)
-
----
-
-## Frontend
-
-### Technologies Used
-
-| Technology | Purpose |
-|------------|---------|
-| **HTML5** | Semantic structure, forms, accessibility (ARIA labels, roles) |
-| **CSS3** | Layout, animations, glassmorphism, starfield, responsive design |
-| **Vanilla JavaScript** | No frameworks; fetch API, localStorage, MediaRecorder for audio |
-| **Google Fonts** | Orbitron (headings), Inter, Exo 2 (body) |
-
-### Frontend Pages
-
-1. **`index.html`** — Landing page
-   - Hero section with animated robot
-   - Feature cards (Instant Responses, Secure & Private, Space-grade AI, Full History)
-   - Navigation to Login / Get Started
-
-2. **`login.html`** — Login form
-   - Email & password
-   - Client-side validation
-   - JWT stored in `localStorage`
-
-3. **`register.html`** — Registration form
-   - Name, surname, email, password
-   - Password confirmation
-
-4. **`chat.html`** — Main chat application
-   - Sidebar: user info, settings, history, logout
-   - Chat area: messages, typing indicator, quick prompts
-   - Input: text (Enter to send) + microphone for voice
-   - Modals: logout confirmation, settings (profile, password)
-
-### Frontend Features
-
-- **Starfield background** — CSS starfield with twinkle animation
-- **Animated robot** — SVG robot with click “takeoff” animation
-- **Shooting stars** — Optional decorative effect on chat page
-- **Audio recording** — Browser MediaRecorder API to send voice messages
-- **Responsive layout** — Works on mobile and desktop
+| Layer     | Technology                          |
+|-----------|-------------------------------------|
+| Frontend  | Vanilla HTML/CSS/JS (no framework)  |
+| Backend   | Node.js + Express 4                 |
+| Database  | PostgreSQL (via `pg` pool)          |
+| Auth      | JWT (jsonwebtoken) + bcryptjs       |
+| AI        | n8n webhook → your AI workflow      |
+| Security  | Helmet, CORS, express-rate-limit    |
+| Deploy    | Docker + Docker Compose             |
 
 ---
 
-## Backend
+## Quick Start
 
-### Technologies Used
-
-| Package | Purpose |
-|---------|---------|
-| **Express** | HTTP server, routing, middleware |
-| **CORS** | Cross-origin requests from frontend |
-| **Helmet** | Security headers |
-| **express-rate-limit** | Rate limiting (auth, chat, global) |
-| **bcryptjs** | Password hashing |
-| **jsonwebtoken** | JWT auth tokens |
-| **pg** | PostgreSQL client |
-| **dotenv** | Environment variables |
-
-### Backend Architecture
-
-```
-server.js
-├── Security: Helmet, CORS, rate limiting
-├── Static files: frontend/ (dev) or public/ (prod)
-├── /api/auth     → auth routes (register, login, profile, password)
-├── /api/chat     → chat routes (message, history, delete)
-├── /api/health   → health check
-└── DB init       → create users & conversations tables
-```
-
-### Routes
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register new user |
-| POST | `/api/auth/login` | Login, returns JWT |
-| PUT | `/api/auth/profile` | Update name/surname (auth required) |
-| PUT | `/api/auth/password` | Change password (auth required) |
-| POST | `/api/chat/message` | Send message, get AI response (auth required) |
-| GET | `/api/chat/history` | Get conversation history (auth required) |
-| DELETE | `/api/chat/:id` | Delete a conversation (auth required) |
-| GET | `/api/health` | Health check |
-
----
-
-## How It Works
-
-### 1. Authentication Flow
-
-```
-User → Register/Login → Backend validates → JWT issued → Stored in localStorage
-→ Subsequent requests include: Authorization: Bearer <token>
-```
-
-### 2. Chat Flow
-
-```
-User types message → POST /api/chat/message
-→ Backend fetches last 15 messages for context
-→ Backend calls n8n webhook with message + history
-→ n8n (with AI) returns response
-→ Backend optionally calls Hugging Face for image generation
-→ Response + optional image saved to DB
-→ Response returned to frontend
-```
-
-### 3. n8n Integration
-
-The backend sends user messages to an n8n webhook (`N8N_WEBHOOK` env var). The webhook can:
-
-- Process text with an AI model (OpenAI, etc.)
-- Transcribe audio
-- Return a text response or JSON with `action: "generate_image"` and `image_prompt` for image generation
-
-### 4. Image Generation
-
-If the AI returns JSON like:
-
-```json
-{
-  "action": "generate_image",
-  "image_prompt": "A robot in space",
-  "response": "Here's your image!"
-}
-```
-
-The backend calls Hugging Face’s Stable Diffusion XL API and returns the image as base64 in the response.
-
-### 5. Database Schema
-
-**users**
-
-- `id`, `name`, `surname`, `email`, `password_hash`, `created_at`
-
-**conversations**
-
-- `id`, `user_id`, `message`, `response`, `created_at`
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- PostgreSQL
-- (Optional) n8n for AI chat
-- (Optional) Hugging Face API key for image generation
-
-### Install Dependencies
+### Development (local)
 
 ```bash
-# Backend
-cd backend && npm install
+# 1. Install dependencies
+cd backend
+npm install
 
-# Python (for deploy script)
-pip install -r requirements.txt
+# 2. Set environment variables (or create a .env file)
+export DB_HOST=localhost
+export DB_PORT=5432
+export DB_NAME=mydatabase
+export DB_USER=tidiane
+export DB_PASSWORD=tidkon
+export JWT_SECRET=your_secret_key
+export N8N_WEBHOOK=http://76.13.62.195:5678/webhook/astrobot
+
+# 3. Start the server (serves ../frontend as static files in dev mode)
+npm run dev
+# or
+npm start
+
+# 4. Open http://localhost:3000
 ```
 
-### Configure Environment
-
-Create `backend/.env`:
-
-```env
-PORT=3000
-NODE_ENV=development
-JWT_SECRET=your_secret_here
-
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=mydatabase
-DB_USER=your_user
-DB_PASSWORD=your_password
-
-# Optional
-N8N_WEBHOOK=http://localhost:5678/webhook/astrobot
-HF_API_KEY=your_huggingface_key
-```
-
-### Create Database
-
-```sql
-CREATE DATABASE mydatabase;
-```
-
-### Run
+### Production (Docker)
 
 ```bash
-cd backend && node server.js
-```
+# From the astrobot root directory:
 
-Then open `http://localhost:3000` in your browser.
+# Make sure the n8n external network exists:
+docker network ls | grep n8n_container_n8n-net
 
----
-
-## Deployment Script
-
-A Python script (`deploy_frontend.example.py`) is provided for deploying frontend files via SFTP and rebuilding the Docker container on a remote server. It uses `paramiko` for SSH/SFTP.
-
-```bash
-cp deploy_frontend.example.py deploy_frontend.py
-# Edit deploy_frontend.py with your server details
-pip install paramiko
-python deploy_frontend.py
-```
-
-> **Note:** `deploy_frontend.py` is in `.gitignore` so credentials are not committed.
-
----
-
-## Docker Deployment
-
-The project includes a Docker setup that:
-
-1. Builds a Node.js image with backend + frontend
-2. Connects to an external PostgreSQL container (e.g. from n8n)
-3. Uses the `n8n_container_n8n-net` network
-
-```bash
+# Build and start AstroBot:
 cd docker
-docker-compose up -d
+docker-compose up -d --build
+
+# Check logs:
+docker-compose logs -f astrobot
+
+# Stop:
+docker-compose down
 ```
-
-Ensure the `n8n_container_n8n-net` network exists and PostgreSQL is reachable at `postgre_container`.
-
----
-
-## API Reference
-
-### POST /api/auth/register
-
-**Body:** `{ name, surname, email, password }`
-
-**Response:** `{ success, token, user }`
-
-### POST /api/auth/login
-
-**Body:** `{ email, password }`
-
-**Response:** `{ success, token, user }`
-
-### POST /api/chat/message
-
-**Headers:** `Authorization: Bearer <token>`
-
-**Body:** `{ message, session_id?, audio? }`
-
-**Response:** `{ success, data: { id, message, response, image_url?, createdAt } }`
 
 ---
 
 ## Environment Variables
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| PORT | No | 3000 | Server port |
-| NODE_ENV | No | development | `development` or `production` |
-| JWT_SECRET | Yes | — | Secret for JWT signing |
-| DB_HOST | Yes | — | PostgreSQL host |
-| DB_PORT | No | 5432 | PostgreSQL port |
-| DB_NAME | Yes | — | Database name |
-| DB_USER | Yes | — | Database user |
-| DB_PASSWORD | Yes | — | Database password |
-| N8N_WEBHOOK | No | — | n8n webhook URL for chat |
-| HF_API_KEY | No | — | Hugging Face API key for images |
+| Variable      | Default                                        | Description              |
+|---------------|------------------------------------------------|--------------------------|
+| `PORT`        | `3000`                                         | Server listening port    |
+| `NODE_ENV`    | `development`                                  | Environment mode         |
+| `JWT_SECRET`  | `astrobot_super_secret_key_2024`               | JWT signing secret       |
+| `DB_HOST`     | `postgre_container`                            | PostgreSQL hostname      |
+| `DB_PORT`     | `5432`                                         | PostgreSQL port          |
+| `DB_NAME`     | `mydatabase`                                   | Database name            |
+| `DB_USER`     | `tidiane`                                      | Database user            |
+| `DB_PASSWORD` | `tidkon`                                       | Database password        |
+| `N8N_WEBHOOK` | `http://76.13.62.195:5678/webhook/astrobot`    | n8n AI webhook URL       |
+
+> **Important:** Change `JWT_SECRET` to a strong random string in production.
 
 ---
 
-## License
+## API Reference
 
-MIT
+### Auth
+
+#### `POST /api/auth/register`
+```json
+{
+  "name": "Tidiane",
+  "surname": "Konaté",
+  "email": "tidiane@example.com",
+  "password": "securepassword"
+}
+```
+Returns `{ success, token, user }`.
+
+#### `POST /api/auth/login`
+```json
+{
+  "email": "tidiane@example.com",
+  "password": "securepassword"
+}
+```
+Returns `{ success, token, user }`.
+
+### Chat (requires `Authorization: Bearer <token>`)
+
+#### `POST /api/chat/message`
+```json
+{ "message": "Hello AstroBot!" }
+```
+Forwards to n8n webhook, saves response in DB, returns `{ success, data: { id, message, response, createdAt } }`.
+
+#### `GET /api/chat/history`
+Returns last 50 conversations in chronological order.
+
+### Health
+
+#### `GET /api/health`
+Returns server status and version info.
 
 ---
 
-**Built with 🚀 by Tidiane, Saad, Ahmed & Sidi**
+## Database Schema
+
+```sql
+CREATE TABLE users (
+  id            SERIAL PRIMARY KEY,
+  name          VARCHAR(100) NOT NULL,
+  surname       VARCHAR(100) NOT NULL,
+  email         VARCHAR(255) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE conversations (
+  id         SERIAL PRIMARY KEY,
+  user_id    INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  message    TEXT NOT NULL,
+  response   TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## n8n Webhook Integration
+
+When a user sends a message, the backend posts to your n8n webhook:
+
+```json
+{
+  "user_id": 1,
+  "message": "What's the distance to Alpha Centauri?",
+  "user_name": "Tidiane",
+  "user_email": "tidiane@example.com"
+}
+```
+
+Your n8n workflow should return a JSON body with one of these fields:
+- `response`
+- `message`
+- `output`
+- `text`
+- `answer`
+
+---
+
+## Security Features
+
+- **Helmet** — sets secure HTTP response headers
+- **CORS** — restricted to known origins in production
+- **Rate limiting** — 200 req/15min globally, 20 auth req/15min, 30 chat req/min
+- **bcryptjs** — passwords hashed with salt rounds = 12
+- **JWT** — tokens expire after 7 days
+- **Non-root Docker user** — container runs as `astrobot` user
+
+---
+
+## Design
+
+- Fonts: **Orbitron** (headings) + **Exo 2** (body) via Google Fonts
+- Color palette: Deep space blues + electric cyan (#00b4d8)
+- Glassmorphism cards with backdrop-filter blur
+- Animated star background (CSS radial gradients)
+- Floating robot animation (CSS keyframes)
+- Inline SVG AstroBot mascot with glowing eyes + antenna
+
+---
+
+## Team
+
+AstroBot is a **university graduation project** developed by:
+
+- **Tidiane Konaté**
+- **Sidi Mohamed Sall**
+- **Ahmed Essalem**
+- **Saad Ibrahim Houssein**
+
+— 2026
